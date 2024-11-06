@@ -8,11 +8,11 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <nav className="sticky top-0 z-50 backdrop-blur-md bg-orange-600/90 text-white shadow-lg">
-      <div className="container mx-auto px-4 py-2">
+    <nav className="sticky top-0 z-50 backdrop-blur-glass bg-glass border-b border-white/10">
+      <div className="container mx-auto px-6 py-4">
         <div className="flex justify-between items-center">
-          <Link href="/" className="flex items-center space-x-2 hover:scale-105 transition-transform">
-            <div className="relative w-12 h-12">
+          <Link href="/" className="flex items-center space-x-3 hover:scale-105 transition-all">
+            <div className="relative w-12 h-12 bg-white/10 rounded-xl p-2 backdrop-blur-sm">
               <Image
                 src="/images/logo.png"
                 alt="Kusina De Amadeo Logo"
@@ -22,26 +22,27 @@ export default function Navbar() {
                 priority
               />
             </div>
-            <span className="text-2xl font-bold hidden md:block">Kusina De Amadeo</span>
+            <span className="text-2xl font-bold hidden md:block text-white/90">
+              Kusina De Amadeo
+            </span>
           </Link>
 
-          <div className="hidden md:flex space-x-6">
-            <Link 
-              href="/menu" 
-              className="hover:text-orange-200 transition-colors font-medium"
-            >
-              Menu
-            </Link>
-            <Link 
-              href="/cart" 
-              className="hover:text-orange-200 transition-colors font-medium"
-            >
-              Cart
-            </Link>
+          <div className="hidden md:flex space-x-8">
+            {['Menu', 'Cart'].map((item) => (
+              <Link
+                key={item}
+                href={`/${item.toLowerCase()}`}
+                className="relative text-white/80 hover:text-white transition-colors group"
+              >
+                <span>{item}</span>
+                <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-white scale-x-0 group-hover:scale-x-100 transition-transform" />
+              </Link>
+            ))}
           </div>
 
+          {/* Mobile menu button */}
           <button 
-            className="md:hidden"
+            className="md:hidden text-white/80 hover:text-white transition-colors"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             {isMenuOpen ? (
@@ -52,22 +53,19 @@ export default function Navbar() {
           </button>
         </div>
 
+        {/* Mobile menu */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 space-y-4">
-            <Link 
-              href="/menu" 
-              className="block hover:text-orange-200 transition-colors font-medium"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Menu
-            </Link>
-            <Link 
-              href="/cart" 
-              className="block hover:text-orange-200 transition-colors font-medium"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Cart
-            </Link>
+          <div className="md:hidden py-4 space-y-4 mt-4 border-t border-white/10">
+            {['Menu', 'Cart'].map((item) => (
+              <Link
+                key={item}
+                href={`/${item.toLowerCase()}`}
+                className="block text-white/80 hover:text-white transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {item}
+              </Link>
+            ))}
           </div>
         )}
       </div>
