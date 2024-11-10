@@ -2,6 +2,7 @@ import './globals.css'
 import { Inter } from 'next/font/google'
 import Navbar from '@/components/Navbar'
 import AnimatedBackground from '@/components/AnimatedBackground'
+import { CartProvider } from '@/context/CartContext'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -17,13 +18,15 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} text-gray-800`}>
-        <AnimatedBackground />
-        <Navbar />
-        <main className="container mx-auto px-4 py-8 relative">
-          {children}
-        </main>
+      <body className={`${inter.className} min-h-screen bg-gradient-to-br from-orange-950 to-orange-900`}>
+        <CartProvider>
+          <AnimatedBackground />
+          <Navbar />
+          <main className="relative">
+            {children}
+          </main>
+        </CartProvider>
       </body>
     </html>
-  )
+  );
 } 

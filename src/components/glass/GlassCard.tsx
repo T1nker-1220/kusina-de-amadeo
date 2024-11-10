@@ -6,22 +6,20 @@ interface GlassCardProps {
 
 export default function GlassCard({ children, className = '', hover = true }: GlassCardProps) {
   return (
-    <div 
-      className={`
-        relative overflow-hidden rounded-2xl
-        backdrop-blur-glass bg-glass-card
-        border border-white/10
-        shadow-glass ${hover ? 'hover:shadow-glass-hover hover:bg-glass-card-hover' : ''}
-        transition-all duration-300 ease-out
-        ${className}
-      `}
-    >
-      {/* Shine effect */}
-      <div className="absolute inset-0 opacity-0 group-hover:opacity-10">
-        <div className="absolute inset-0 translate-x-[-100%] group-hover:animate-glass-shine bg-gradient-to-r from-transparent via-white to-transparent" />
+    <div className="relative group">
+      {/* Glass effect background */}
+      <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl" />
+      
+      {/* Gradient border */}
+      <div className="absolute inset-0 rounded-2xl p-[1px] bg-gradient-to-br from-orange-400/30 via-white/20 to-white/5" />
+      
+      {/* Content */}
+      <div className="relative p-6 rounded-2xl">
+        {children}
       </div>
       
-      {children}
+      {/* Hover effect */}
+      <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br from-orange-400/10 to-transparent" />
     </div>
   );
 } 

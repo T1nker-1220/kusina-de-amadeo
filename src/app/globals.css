@@ -3,6 +3,13 @@
 @tailwind utilities;
 
 :root {
+  --orange-primary: #FF7E33;
+  --orange-light: #FFB088;
+  --orange-dark: #E65A00;
+  --orange-gradient: linear-gradient(135deg, #FF7E33 0%, #FFB088 100%);
+  --glass-bg: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-highlight: rgba(255, 255, 255, 0.15);
   --background: #ffffff;
   --foreground: #171717;
 }

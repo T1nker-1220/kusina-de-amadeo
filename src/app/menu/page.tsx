@@ -1,22 +1,38 @@
 'use client';
+import { useState } from 'react';
 import { products } from '@/data/products';
-import ProductsGrid from '@/components/ProductsGrid';
-import { Product } from '@/types/product';
+import ProductCard from '@/components/ProductCard';
+import CategoryFilter from '@/components/CategoryFilter';
+
 export default function MenuPage() {
-  const handleAddToCart = (product: Product) => {
-    // Implement cart functionality
-    console.log(`Adding ${product.name} to cart`);
-  };
+  const [selectedCategory, setSelectedCategory] = useState('all');
+
+  const filteredProducts = selectedCategory === 'all'
+    ? products
+    : products.filter(product => product.category === selectedCategory);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Our Menu</h1>
-      <ProductsGrid products={products.map(p => ({
-        ...p,
-        available: true,
-        description: p.description || '', // Ensure description is always a string
-        image: p.image || '/default-product-image.jpg' // Provide default image
-      }))} onAddToCart={handleAddToCart} />
-    </div>
+    <section className="min-h-screen w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-4xl font-bold mb-8 text-white/90">Our Menu</h1>
+        
+        <CategoryFilter
+          selectedCategory={selectedCategory}
+          onSelectCategory={setSelectedCategory}
+        />
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6 mt-8">
+          {filteredProducts.map(product => (
+            <ProductCard 
+              key={product.id} 
+              product={{
+                ...product,
+                image: product.image || '/default-product-image.jpg'
+              }} 
+            />
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
