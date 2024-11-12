@@ -1,6 +1,5 @@
 'use client';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
-import { motion } from 'framer-motion';
 import { useState } from 'react';
 
 interface SearchBarProps {
@@ -8,28 +7,30 @@ interface SearchBarProps {
 }
 
 export default function SearchBar({ onSearch }: SearchBarProps) {
-  const [isFocused, setIsFocused] = useState(false);
+  const [query, setQuery] = useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSearch(query);
+  };
 
   return (
-    <motion.div
-      initial={false}
-      animate={isFocused ? { scale: 1.02 } : { scale: 1 }}
-      className="relative max-w-xl mx-auto"
-    >
-      <input
-        type="text"
-        placeholder="Search menu items..."
-        onChange={(e) => onSearch(e.target.value)}
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
-        className="w-full px-4 py-3 pl-12
-          rounded-xl backdrop-blur-xl
-          bg-white/5 border border-white/20
-          text-white/90 placeholder:text-white/50
-          focus:outline-none focus:border-white/30
-          transition-all duration-300"
-      />
-      <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
-    </motion.div>
+    <form onSubmit={handleSubmit} className="w-full max-w-md">
+      <div className="relative">
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search menu items..."
+          className="w-full py-2 px-4 pl-10 rounded-lg
+            bg-white/5 border border-white/10
+            text-white placeholder-white/50
+            focus:outline-none focus:border-orange-500/50
+            transition-colors"
+        />
+        <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 
+          w-5 h-5 text-white/50" />
+      </div>
+    </form>
   );
 } 

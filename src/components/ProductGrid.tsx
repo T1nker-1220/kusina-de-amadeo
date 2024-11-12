@@ -1,25 +1,34 @@
-import { motion } from 'framer-motion';
+'use client';
+import { useState } from 'react';
 import ProductCard from './ProductCard';
-import { Product } from '../types/product';
+import SearchBar from './SearchBar';
+import { Product } from '@/types/product';
 
-const fadeIn = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 }
-};
+interface ProductGridProps {
+  products: Product[];
+}
 
-export default function ProductGrid({ products }: { products: Product[] }) {
+export function ProductGrid({ products }: ProductGridProps) {
+  const [searchQuery, setSearchQuery] = useState('');
+  
+  const filteredProducts = products.filter(product =>
+    product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (product.description && product.description.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-fr">
-      {products.map(product => (
-        <motion.div
-          key={product.id}
-          variants={fadeIn}
-          initial="initial"
-          animate="animate"
-        >
-          <ProductCard product={product} onAddToCart={() => {}} />
-        </motion.div>
-      ))}
+    <div className="space-y-6">
+      <SearchBar onSearch={setSearchQuery} />
+      
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredProducts.map((product) => (
+          <ProductCard key={product.id} product={product} />
+        ))}
+      </div>
+      
+      {filteredProducts.length === 0 && (
+        <p className="text-center text-gray-500">No products found</p>
+      )}
     </div>
   );
 } 
