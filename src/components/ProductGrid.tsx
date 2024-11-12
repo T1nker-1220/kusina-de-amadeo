@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import ProductCard from './ProductCard';
 import SearchBar from './SearchBar';
-import { Product } from '@/types/product';
+import { Product } from '@/types/index';
 
 interface ProductGridProps {
   products: Product[];

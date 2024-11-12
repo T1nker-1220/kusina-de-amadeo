@@ -4,7 +4,7 @@ import { useCart } from '@/context/CartContext';
 import ProductImage from './ProductImage';
 import { Product } from '@/types';
 import { ShoppingCartIcon, PlusIcon, MinusIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 interface ProductCardProps {
   product: Product;
@@ -20,7 +20,7 @@ export default function ProductCard({ product }: ProductCardProps) {
     try {
       const newQuantity = quantity + change;
       if (newQuantity > 0) {
-        updateQuantity(product.id, newQuantity);
+        updateQuantity((product.id), newQuantity);
       }
     } catch (error) {
       setError('Error updating quantity');

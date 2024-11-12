@@ -19,21 +19,21 @@ export function CartItem({ id, name, price, quantity }: CartItemProps) {
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
           <button
-            onClick={() => updateQuantity(Number(id), quantity - 1)}
+            onClick={() => updateQuantity((id), quantity - 1)}
             className="px-2 py-1 bg-gray-200 rounded"
           >
             -
           </button>
           <span>{quantity}</span>
           <button
-            onClick={() => updateQuantity(Number(id), quantity + 1)}
+            onClick={() => updateQuantity((id), quantity + 1)}
             className="px-2 py-1 bg-gray-200 rounded"
           >
             +
           </button>
         </div>
         <button
-          onClick={() => removeFromCart(Number(id))}
+          onClick={() => removeFromCart((id))}
           className="text-red-500"
         >
           Remove

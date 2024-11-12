@@ -9,8 +9,8 @@ interface CartItem extends Product {
 interface CartContextType {
   items: CartItem[];
   addToCart: (product: Product) => void;
-  removeFromCart: (id: number) => void;
-  updateQuantity: (id: number, quantity: number) => void;
+  removeFromCart: (id: string) => void;
+  updateQuantity: (id: string, quantity: number) => void;
   getItemCount: () => number;
   getTotal: () => number;
 }
@@ -34,11 +34,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const removeFromCart = (id: number) => {
+  const removeFromCart = (id: string) => {
     setItems(currentItems => currentItems.filter(item => item.id !== id));
   };
 
-  const updateQuantity = (id: number, quantity: number) => {
+  const updateQuantity = (id: string, quantity: number) => {
     if (quantity <= 0) {
       removeFromCart(id);
       return;

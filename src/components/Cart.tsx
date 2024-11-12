@@ -33,14 +33,14 @@ export function Cart() {
                 
                 <div className="flex items-center gap-2 mt-2">
                   <button
-                    onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                    onClick={() => updateQuantity((item.id), item.quantity - 1)}
                     className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20"
                   >
                     -
                   </button>
                   <span className="w-8 text-center">{item.quantity}</span>
                   <button
-                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                    onClick={() => updateQuantity((item.id), item.quantity + 1)}
                     className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20"
                   >
                     +
@@ -49,7 +49,7 @@ export function Cart() {
               </div>
               
               <button
-                onClick={() => removeFromCart(item.id)}
+                onClick={() => removeFromCart((item.id))}
                 className="text-red-400 hover:text-red-300"
               >
                 Remove
