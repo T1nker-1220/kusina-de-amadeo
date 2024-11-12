@@ -46,22 +46,18 @@ export default function MenuPage() {
           onSelectCategory={(category) => setSelectedCategory(category as Category)}
         />
 
-        <AnimatePresence mode="wait">
-          {filteredProducts.length > 0 ? (
-            <motion.div
-              key="products"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6 mt-8"
-            >
-              {filteredProducts.map(product => (
-                <ProductCard 
-                  key={product.id}
-                  product={{...product, id: Number(product.id), image: product.image || ''}}
-                  onAddToCart={() => {}} // Added missing required prop
-                />
-              ))}
+        <motion.div
+          variants={container}
+          initial="hidden"
+          animate="show"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6"
+        >
+          {filteredProducts.map(product => (
+            <motion.div key={product.id} variants={item}>
+              <ProductCard product={{
+                ...product,
+                image: product.image || '' // Ensure image is always a string
+              }} />
             </motion.div>
           ) : (
             <motion.div
