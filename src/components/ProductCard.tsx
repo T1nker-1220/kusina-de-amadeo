@@ -7,9 +7,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 interface ProductCardProps {
   product: Product;
+  onAddToCart: (product: Product) => void;
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({ product, onAddToCart }: ProductCardProps) {
   const { addToCart, removeFromCart, updateQuantity, isInCart, getItemQuantity } = useCart();
   const quantity = getItemQuantity(product.id);
   const inCart = isInCart(product.id);

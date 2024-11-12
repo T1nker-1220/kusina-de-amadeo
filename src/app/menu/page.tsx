@@ -57,8 +57,9 @@ export default function MenuPage() {
             >
               {filteredProducts.map(product => (
                 <ProductCard 
-                  key={product.id} 
-                  product={{...product, id: Number(product.id), image: product.image || ''}} 
+                  key={product.id}
+                  product={{...product, id: Number(product.id), image: product.image || ''}}
+                  onAddToCart={() => {}} // Added missing required prop
                 />
               ))}
             </motion.div>
