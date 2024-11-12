@@ -1,36 +1,38 @@
 'use client';
-import { categories } from '@/data/products';
+import { categories } from '@/data/categories';
+import { motion } from 'framer-motion';
 
 interface CategoryFilterProps {
   selectedCategory: string;
-  onSelectCategory: (category: string) => void;
+  onSelectCategory: (categoryId: string) => void;
 }
 
 export default function CategoryFilter({ selectedCategory, onSelectCategory }: CategoryFilterProps) {
   return (
-    <div className="mb-8 overflow-x-auto">
-      <div className="flex gap-2 pb-2">
+    <div className="overflow-x-auto pb-4">
+      <div className="flex gap-2 min-w-max">
         <button
           onClick={() => onSelectCategory('all')}
-          className={`px-4 py-2 rounded-full backdrop-blur-glass border transition-all duration-300 whitespace-nowrap
+          className={`px-4 py-2 rounded-full backdrop-blur-sm border transition-all duration-300
             ${selectedCategory === 'all' 
-              ? 'bg-white/20 border-white/30 text-white' 
-              : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:border-white/20'
+              ? 'bg-orange-500/20 border-orange-500/30 text-white' 
+              : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
             }`}
         >
           All Items
         </button>
+        
         {categories.map(category => (
           <button
-            key={category}
-            onClick={() => onSelectCategory(category)}
-            className={`px-4 py-2 rounded-full backdrop-blur-glass border transition-all duration-300 whitespace-nowrap
-              ${selectedCategory === category 
-                ? 'bg-white/20 border-white/30 text-white' 
-                : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:border-white/20'
+            key={category.id}
+            onClick={() => onSelectCategory(category.id)}
+            className={`px-4 py-2 rounded-full backdrop-blur-sm border transition-all duration-300
+              ${selectedCategory === category.id
+                ? 'bg-orange-500/20 border-orange-500/30 text-white' 
+                : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
               }`}
           >
-            {category}
+            {category.name}
           </button>
         ))}
       </div>

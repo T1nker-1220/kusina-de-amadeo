@@ -12,12 +12,22 @@ interface CartContextType {
   removeFromCart: (productId: string | number) => void;
   updateQuantity: (productId: string | number, quantity: number) => void;
   getTotal: () => number;
+  isInCart: (productId: string | number) => boolean;
+  getItemQuantity: (productId: string | number) => number;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
+
+  const isInCart = (productId: string | number) => {
+    return items.some(item => item.id === productId);
+  };
+
+  const getItemQuantity = (productId: string | number) => {
+    return items.find(item => item.id === productId)?.quantity || 0;
+  };
 
   const addToCart = (product: Product) => {
     setItems(currentItems => {
@@ -57,7 +67,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       addToCart,
       removeFromCart,
       updateQuantity,
-      getTotal
+      getTotal,
+      isInCart,
+      getItemQuantity,
     }}>
       {children}
     </CartContext.Provider>
