@@ -1,14 +1,15 @@
 'use client';
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { products } from '@/data/products';
+import { categories } from '@/data/categories';
 import ProductCard from '@/components/ProductCard';
 import CategoryFilter from '@/components/CategoryFilter';
 import SearchBar from '@/components/SearchBar';
+import ResponsiveGrid from '@/components/ResponsiveGrid';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// Create a client component for the part that uses useSearchParams
-function MenuContent() {
+export default function MenuPage() {
   const searchParams = useSearchParams();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -73,25 +74,17 @@ function MenuContent() {
           <AnimatePresence mode="wait">
             {!isLoading && (
               <motion.div
-                key={selectedCategory}
+                key={selectedCategory + searchQuery}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3 }}
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
               >
-                {filteredProducts.map((product) => (
-                  <motion.div
-                    key={product.id}
-                    layout
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <ProductCard product={product} />
-                  </motion.div>
-                ))}
+                <ResponsiveGrid>
+                  {filteredProducts.map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+                </ResponsiveGrid>
               </motion.div>
             )}
           </AnimatePresence>
@@ -109,26 +102,17 @@ function MenuContent() {
 
           {/* Loading State */}
           {isLoading && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {[...Array(4)].map((_, index) => (
+            <ResponsiveGrid>
+              {[...Array(8)].map((_, index) => (
                 <div
                   key={index}
                   className="animate-pulse rounded-2xl bg-white/5 aspect-square"
                 />
               ))}
-            </div>
+            </ResponsiveGrid>
           )}
         </div>
       </section>
     </div>
   );
-}
-
-// Your page component
-export default function MenuPage() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <MenuContent />
-    </Suspense>
-  )
 }

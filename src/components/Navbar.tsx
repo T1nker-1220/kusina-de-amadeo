@@ -1,74 +1,74 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { useCart } from '@/context/CartContext';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  ShoppingCartIcon, 
+  HomeIcon, 
+  BookOpenIcon,
+  InformationCircleIcon,
+} from '@heroicons/react/24/outline';
+import { FaFacebook } from 'react-icons/fa';
 
 export default function Navbar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { items } = useCart();
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 0);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
-    <nav className="sticky top-0 z-50 backdrop-blur-glass bg-glass border-b border-white/10">
-      <div className="container mx-auto px-6 py-4">
-        <div className="flex justify-between items-center">
-          <Link href="/" className="flex items-center space-x-3 hover:scale-105 transition-all">
-            <div className="relative w-12 h-12 bg-white/10 rounded-xl p-2 backdrop-blur-sm">
-              <Image
-                src="/images/logo.png"
-                alt="Kusina De Amadeo Logo"
-                width={48}
-                height={48}
-                className="object-contain"
-                priority
-              />
-            </div>
-            <span className="text-2xl font-bold hidden md:block text-white/90">
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300
+      ${isScrolled 
+        ? 'bg-theme-dark/80 backdrop-blur-lg border-b border-theme-slate/20' 
+        : 'bg-transparent'}`}
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          <Link href="/">
+            <span className="text-xl font-bold text-theme-peach">
               Kusina De Amadeo
             </span>
           </Link>
 
-          <div className="hidden md:flex space-x-8">
-            {['Menu', 'Cart'].map((item) => (
-              <Link
-                key={item}
-                href={`/${item.toLowerCase()}`}
-                className="relative text-white/80 hover:text-white transition-colors group"
-              >
-                <span>{item}</span>
-                <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-white scale-x-0 group-hover:scale-x-100 transition-transform" />
-              </Link>
-            ))}
+          <div className="hidden md:flex items-center gap-8">
+            <NavLink href="/" icon={<HomeIcon className="w-6 h-6" />}>Home</NavLink>
+            <NavLink href="/menu" icon={<BookOpenIcon className="w-6 h-6" />}>Menu</NavLink>
+            <NavLink href="/about" icon={<InformationCircleIcon className="w-6 h-6" />}>About</NavLink>
           </div>
 
-          {/* Mobile menu button */}
-          <button 
-            className="md:hidden text-white/80 hover:text-white transition-colors"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            {isMenuOpen ? (
-              <XMarkIcon className="h-6 w-6" />
-            ) : (
-              <Bars3Icon className="h-6 w-6" />
-            )}
-          </button>
+          <Link href="/cart">
+            <button className="relative p-2 rounded-lg bg-theme-wine/20 
+              hover:bg-theme-wine/30 transition-colors">
+              <ShoppingCartIcon className="w-6 h-6 text-theme-peach" />
+              {items.length > 0 && (
+                <span className="absolute -top-2 -right-2 w-5 h-5 rounded-full
+                  bg-theme-red text-white text-xs flex items-center justify-center">
+                  {items.length}
+                </span>
+              )}
+            </button>
+          </Link>
         </div>
-
-        {/* Mobile menu */}
-        {isMenuOpen && (
-          <div className="md:hidden py-4 space-y-4 mt-4 border-t border-white/10">
-            {['Menu', 'Cart'].map((item) => (
-              <Link
-                key={item}
-                href={`/${item.toLowerCase()}`}
-                className="block text-white/80 hover:text-white transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {item}
-              </Link>
-            ))}
-          </div>
-        )}
       </div>
     </nav>
+  );
+}
+
+function NavLink({ href, children, icon }: { href: string; children: React.ReactNode; icon: React.ReactNode }) {
+  return (
+    <Link href={href}>
+      <span className="text-white/70 hover:text-white transition-colors
+        flex items-center gap-2">
+        {icon}
+        {children}
+      </span>
+    </Link>
   );
 } 

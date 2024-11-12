@@ -1,9 +1,11 @@
 import './globals.css'
 import { Inter } from 'next/font/google'
 import Navbar from '@/components/Navbar'
-import AnimatedBackground from '@/components/AnimatedBackground'
 import { CartProvider } from '@/context/CartContext'
-import { ToastProvider } from '@/context/ToastContext'
+import Footer from '@/components/Footer'
+import { Suspense } from 'react';
+
+
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -19,16 +21,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        <ToastProvider>
-          <CartProvider>
-            <AnimatedBackground />
-            <Navbar />
-            <main className="relative">
-              {children}
-            </main>
-          </CartProvider>
-        </ToastProvider>
+      <body className="bg-gradient-to-br from-dark-blue to-navy min-h-screen text-peach">
+        <CartProvider>
+          <Navbar />
+          <Suspense fallback={<div>Loading...</div>}>
+            <main className="pt-16">{children}</main>
+          </Suspense>
+          <Footer />
+        </CartProvider>
       </body>
     </html>
   );

@@ -1,7 +1,6 @@
 'use client';
 import { useState } from 'react';
 import { useCart } from '@/context/CartContext';
-import ProductImage from './ProductImage';
 import { Product } from '@/types';
 import { ShoppingCartIcon, PlusIcon, MinusIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { motion } from 'framer-motion';
@@ -34,49 +33,34 @@ export default function ProductCard({ product }: ProductCardProps) {
   return (
     <motion.div
       whileHover={{ y: -5 }}
-      className="group relative overflow-hidden rounded-2xl backdrop-blur-sm bg-white/5 border border-white/10"
+      className="group relative overflow-hidden rounded-2xl 
+        bg-theme-navy border border-theme-slate/30 
+        hover:border-theme-peach/30 transition-all duration-300"
     >
-      <div className="aspect-square overflow-hidden">
+      <div className="aspect-square relative">
         <img
           src={product.image}
           alt={product.name}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+          className="w-full h-full object-cover"
         />
       </div>
       
-      <div className="p-4">
-        <h3 className="text-lg font-semibold text-white/90">{product.name}</h3>
-        <p className="text-white/60 text-sm mb-4">{product.description}</p>
-        <div className="flex items-center justify-between">
-          <span className="text-white/90">₱{product.price}</span>
-          <div className="flex items-center">
-            <button
-              onClick={() => handleQuantityChange(-1)}
-              className="px-2 py-1 rounded-lg bg-orange-500/20 text-orange-400 
-                hover:bg-orange-500/30 transition-colors"
-              title="Decrease quantity"
-            >
-              <MinusIcon className="w-4 h-4" />
-            </button>
-            <span className="text-white/90 mx-2">{quantity}</span>
-            <button
-              onClick={() => handleQuantityChange(1)}
-              className="px-2 py-1 rounded-lg bg-orange-500/20 text-orange-400 
-                hover:bg-orange-500/30 transition-colors"
-              title="Increase quantity"
-            >
-              <PlusIcon className="w-4 h-4" />
-            </button>
-          </div>
-          <button
-            onClick={() => addToCart(product)}
-            className="px-4 py-2 rounded-lg bg-orange-500/20 text-orange-400 
-              hover:bg-orange-500/30 transition-colors"
-          >
-            <ShoppingCartIcon className="w-4 h-4 mr-2" />
-            Add to Cart
-          </button>
-        </div>
+      <div className="p-6 space-y-4">
+        <h3 className="text-lg font-semibold text-theme-peach">
+          {product.name}
+        </h3>
+        <p className="text-theme-slate">₱{product.price.toFixed(2)}</p>
+        
+        <button
+          onClick={() => addToCart(product)}
+          className="w-full py-2.5 px-4 rounded-lg
+            bg-theme-wine hover:bg-theme-red
+            text-white transition-colors
+            flex items-center justify-center gap-2"
+        >
+          <ShoppingCartIcon className="w-5 h-5" />
+          <span>Add to Cart</span>
+        </button>
       </div>
     </motion.div>
   );
