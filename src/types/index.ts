@@ -1,13 +1,13 @@
+export type CategoryType = 'budget-meals' | 'silog-meals' | 'ala-carte' | 'beverages' | 'all';
+
 export interface Product {
-  id: number;
+  id: string;
   name: string;
   price: number;
   category: CategoryType;
-  image: string;
   description?: string;
+  image?: string;
 }
-
-export type CategoryType = 'budget-meals' | 'silog-meals' | 'ala-carte' | 'beverages' | 'all';
 
 export interface CartItem extends Product {
   quantity: number;

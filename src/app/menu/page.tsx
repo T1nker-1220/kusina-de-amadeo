@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { products } from '@/data/products';
-import { categories } from '@/data/categories';
 import ProductCard from '@/components/ProductCard';
 import CategoryFilter from '@/components/CategoryFilter';
 import SearchBar from '@/components/SearchBar';

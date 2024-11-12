@@ -1,11 +1,4 @@
-export interface Product {
-  id: string;
-  name: string;
-  price: number;
-  category: string;
-  description?: string;
-  image?: string;
-}
+import { Product, CategoryType } from '@/types';
 
 export const products: Product[] = [
   // Budget Meals
