@@ -1,6 +1,5 @@
 'use client';
 import { categories } from '@/data/categories';
-import { motion } from 'framer-motion';
 
 interface CategoryFilterProps {
   selectedCategory: string;

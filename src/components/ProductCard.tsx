@@ -67,6 +67,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                 onClick={() => handleQuantityChange(-1)}
                 className="w-8 h-8 rounded-md bg-white/10 hover:bg-white/20 
                   flex items-center justify-center transition-colors"
+                title="Decrease quantity"
               >
                 <MinusIcon className="w-4 h-4 text-white/90" />
               </button>
@@ -79,6 +80,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                 onClick={() => handleQuantityChange(1)}
                 className="w-8 h-8 rounded-md bg-white/10 hover:bg-white/20 
                   flex items-center justify-center transition-colors"
+                title="Increase quantity"
               >
                 <PlusIcon className="w-4 h-4 text-white/90" />
               </button>

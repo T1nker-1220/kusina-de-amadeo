@@ -1,5 +1,5 @@
 'use client';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { CheckCircleIcon, XCircleIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 export type ToastType = 'success' | 'error';
@@ -34,6 +34,8 @@ export default function Toast({ message, type, onClose }: ToastProps) {
       <button
         onClick={onClose}
         className="p-1 hover:bg-white/10 rounded-full transition-colors"
+        title="Close"
+        type="button"
       >
         <XMarkIcon className="w-4 h-4 text-white/70" />
       </button>

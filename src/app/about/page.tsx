@@ -64,7 +64,7 @@ export default function AboutPage() {
             Our Journey
           </h1>
           <p className="text-xl text-white/70 max-w-2xl mx-auto">
-            Since 2021, we've been serving authentic Filipino cuisine with love and dedication
+            Since 2021, we&apos;ve been serving authentic Filipino cuisine with love and dedication
           </p>
         </motion.div>
 

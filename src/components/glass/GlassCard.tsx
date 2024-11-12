@@ -6,9 +6,9 @@ interface GlassCardProps {
 
 export default function GlassCard({ children, className = '', hover = true }: GlassCardProps) {
   return (
-    <div className="relative group">
+    <div className={`relative group ${className}`}>
       {/* Glass effect background */}
-      <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl" />
+      <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl ${!hover && 'group-hover:opacity-0'}`} />
       
       {/* Gradient border */}
       <div className="absolute inset-0 rounded-2xl p-[1px] bg-gradient-to-br from-orange-400/30 via-white/20 to-white/5" />
