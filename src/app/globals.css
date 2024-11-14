@@ -51,9 +51,10 @@ body {
 
 @layer utilities {
   .glass-panel {
-    @apply bg-theme-navy/30 backdrop-blur-md 
-      border border-theme-slate/10 
-      shadow-lg shadow-theme-dark/5;
+    @apply bg-white/5 backdrop-blur-md
+      border border-white/10
+      shadow-xl shadow-black/5
+      rounded-2xl;
   }
   
   .glass-button {
@@ -111,8 +112,8 @@ body {
   }
   
   .safe-padding {
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
+    padding-left: max(env(safe-area-inset-left), 1rem);
+    padding-right: max(env(safe-area-inset-right), 1rem);
   }
 
   .smooth-image {
@@ -120,4 +121,56 @@ body {
     backface-visibility: hidden;
     transform: translateZ(0);
   }
+
+  .fancy-button {
+    @apply relative overflow-hidden rounded-xl
+      bg-gradient-to-br from-theme-wine via-theme-red to-theme-wine
+      hover:from-theme-red hover:via-theme-wine hover:to-theme-red
+      text-white font-medium shadow-lg
+      border border-white/10 backdrop-blur-sm
+      transition-all duration-500
+      before:absolute before:inset-0
+      before:bg-gradient-to-r before:from-transparent
+      before:via-white/10 before:to-transparent
+      before:-translate-x-full hover:before:translate-x-full
+      before:transition-transform before:duration-700
+      active:scale-[0.98];
+  }
+
+  .hover-gradient {
+    @apply relative overflow-hidden
+      before:absolute before:inset-0
+      before:bg-gradient-to-r
+      before:from-theme-wine/0 before:via-theme-peach/10 before:to-theme-wine/0
+      before:opacity-0 hover:before:opacity-100
+      before:transition-opacity before:duration-500;
+  }
+
+  .animated-text {
+    @apply bg-gradient-to-r from-theme-peach via-theme-red to-theme-peach
+      bg-[length:200%_auto] animate-gradient bg-clip-text text-transparent;
+  }
+
+  .glow-effect {
+    @apply relative after:absolute after:inset-0
+      after:bg-gradient-to-r after:from-theme-peach/0
+      after:via-theme-peach/30 after:to-theme-peach/0
+      after:blur-xl after:opacity-0
+      hover:after:opacity-100 after:transition-opacity
+      after:duration-500 overflow-hidden;
+  }
+}
+
+@keyframes gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-gradient {
+  animation: gradient 3s linear infinite;
+}
+
+.transition-smooth {
+  @apply transition-all duration-300 ease-out;
 }

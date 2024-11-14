@@ -1,12 +1,16 @@
-import './globals.css'
-import { Inter } from 'next/font/google'
-import Navbar from '@/components/Navbar'
-import MobileMenu from '@/components/MobileMenu'
-import { CartProvider } from '@/context/CartContext'
-import Footer from '@/components/Footer'
+import './globals.css';
+import { Poppins } from 'next/font/google';
+import { CartProvider } from '@/context/CartContext';
+import Navbar from '@/components/Navbar';
+import LayoutTransition from '@/components/LayoutTransition';
+import MobileMenu from '@/components/MobileMenu';
+import Footer from '@/components/Footer';
 import { Suspense } from 'react';
 
-const inter = Inter({ subsets: ['latin'] })
+const poppins = Poppins({
+  subsets: ['latin'],
+  weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
+});
 
 export const metadata = {
   title: 'Kusina De Amadeo',
@@ -25,13 +29,17 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <body className="bg-gradient-to-br from-dark-blue to-navy min-h-screen text-peach">
+    <html lang="en" className={poppins.className}>
+      <body className="bg-theme-dark text-white min-h-screen">
         <CartProvider>
           <Navbar />
           <MobileMenu />
           <Suspense fallback={<div>Loading...</div>}>
-            <main className="pt-16">{children}</main>
+            <main className="pt-16 md:pt-20">
+              <LayoutTransition>
+                {children}
+              </LayoutTransition>
+            </main>
           </Suspense>
           <Footer />
         </CartProvider>

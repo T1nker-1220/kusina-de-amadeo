@@ -14,10 +14,16 @@ module.exports = {
         'peach': '#fda481',
         'crimson': '#b4182d',
         'burgundy': '#54162b',
+        primary: '#ff6b6b', // or any color of your choice
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+      },
+      screens: {
+        'mobile-s': '320px',
+        'mobile-m': '375px',
+        'xs': '480px',
       },
     },
   },

@@ -267,27 +267,28 @@ export default function HomePage() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto"> {/* Changed from max-w-7xl */}
+      <section className="py-12 md:py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="space-y-12"
+            className="space-y-8 md:space-y-12"
           >
             <div className="text-center space-y-2">
-              <h2 className="text-3xl font-bold text-white/90">
+              <h2 className="text-2xl md:text-3xl font-bold text-white/90">
                 Moments at Kusina De Amadeo
               </h2>
-              <p className="text-white/70">
+              <p className="text-sm md:text-base text-white/70">
                 Capturing the joy of dining with us
               </p>
             </div>
 
             <div className="relative group">
               {/* Image Slider */}
-              <div className="relative h-[600px] overflow-hidden rounded-3xl 
+              <div className="relative h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] 
+                overflow-hidden rounded-xl md:rounded-3xl 
                 shadow-2xl shadow-black/20 border border-white/10
                 group-hover:shadow-orange-500/10 transition-all duration-500">
                 <AnimatePresence
@@ -323,18 +324,16 @@ export default function HomePage() {
                           animate={{ opacity: 1 }}
                           transition={{ duration: 0.5 }}
                           className="absolute inset-0 bg-gradient-to-t 
-                            from-black/60 via-black/20 to-transparent
-                            hover:from-black/40 hover:via-black/10 
-                            transition-all duration-500"
-                        ></motion.div>
+                            from-black/60 via-black/20 to-transparent"
+                        />
                       </motion.div>
                     </motion.div>
                   ))}
                 </AnimatePresence>
 
-                {/* Navigation Arrows with Enhanced Styling */}
-                <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 
-                  flex justify-between px-6 z-10 opacity-0 group-hover:opacity-100
+                {/* Navigation Arrows - Hidden on mobile, visible on larger screens */}
+                <div className="hidden md:flex absolute inset-x-0 top-1/2 -translate-y-1/2 
+                  justify-between px-4 lg:px-6 z-10 opacity-0 group-hover:opacity-100
                   transition-opacity duration-300">
                   <motion.button
                     whileHover={{ scale: 1.1, x: -5 }}
@@ -364,14 +363,35 @@ export default function HomePage() {
                   </motion.button>
                 </div>
 
-                {/* New Number Indicator */}
-                <div className="absolute bottom-6 right-6 z-10">
+                {/* Mobile Navigation Controls */}
+                <div className="md:hidden flex justify-center gap-4 absolute bottom-4 left-1/2 
+                  -translate-x-1/2 z-10">
+                  <motion.button
+                    whileTap={{ scale: 0.9 }}
+                    onClick={handlePrev}
+                    className="p-2 rounded-full bg-black/60 backdrop-blur-md 
+                      border border-white/20"
+                  >
+                    <ArrowLeftIcon className="w-4 h-4 text-white" />
+                  </motion.button>
+                  <motion.button
+                    whileTap={{ scale: 0.9 }}
+                    onClick={handleNext}
+                    className="p-2 rounded-full bg-black/60 backdrop-blur-md 
+                      border border-white/20"
+                  >
+                    <ArrowRightIcon className="w-4 h-4 text-white" />
+                  </motion.button>
+                </div>
+
+                {/* Number Indicator - Responsive sizing */}
+                <div className="absolute top-4 right-4 md:bottom-6 md:right-6 md:top-auto z-10">
                   <motion.div
                     initial={false}
                     animate={{ scale: [1.2, 1], opacity: [0, 1] }}
                     key={currentTestimonial}
-                    className="px-6 py-3 rounded-full bg-black/60 backdrop-blur-md 
-                      border border-white/20 text-white font-medium
+                    className="px-3 py-2 md:px-6 md:py-3 rounded-full bg-black/60 backdrop-blur-md 
+                      border border-white/20 text-white text-sm md:text-base font-medium
                       flex items-center gap-2"
                   >
                     <span className="text-orange-400">
@@ -384,8 +404,8 @@ export default function HomePage() {
                   </motion.div>
                 </div>
 
-                {/* Quick Jump Navigation */}
-                <div className="absolute left-6 bottom-6 z-10 flex gap-2">
+                {/* Quick Jump Navigation - Hidden on mobile */}
+                <div className="hidden md:flex absolute left-6 bottom-6 z-10 gap-2">
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -410,7 +430,42 @@ export default function HomePage() {
                   </motion.button>
                 </div>
 
-                {paginationControls}
+                {/* Pagination Controls - Responsive */}
+                <div className="absolute left-1/2 -translate-x-1/2 bottom-16 md:bottom-6 z-10 
+                  flex items-center gap-2 md:gap-4 px-4 py-2 md:px-6 md:py-3 
+                  rounded-full bg-black/60 backdrop-blur-md 
+                  border border-white/20 scale-75 md:scale-100">
+                  {/* Skip button - Hidden on mobile */}
+                  <button
+                    onClick={() => jumpToImage(currentTestimonial - 5)}
+                    className="hidden md:block text-white/80 hover:text-orange-400 transition-colors"
+                  >
+                    «
+                  </button>
+                  {[-2, -1, 0, 1, 2].map((offset) => {
+                    const index = getImageIndex(currentTestimonial + offset);
+                    return (
+                      <motion.button
+                        key={index}
+                        whileHover={{ scale: 1.2 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => jumpToImage(index)}
+                        className={`w-1.5 md:w-2 h-1.5 md:h-2 rounded-full transition-all duration-300 ${
+                          index === currentTestimonial
+                            ? 'bg-orange-500 w-3 md:w-4'
+                            : 'bg-white/40 hover:bg-white/60'
+                        }`}
+                      />
+                    );
+                  })}
+                  {/* Skip button - Hidden on mobile */}
+                  <button
+                    onClick={() => jumpToImage(currentTestimonial + 5)}
+                    className="hidden md:block text-white/80 hover:text-orange-400 transition-colors"
+                  >
+                    »
+                  </button>
+                </div>
               </div>
             </div>
           </motion.div>

@@ -37,11 +37,27 @@ export function CartProvider({ children }: { children: ReactNode }) {
       });
     },
     removeFromCart: (id: string) => {
-      setItems(currentItems => currentItems.filter(item => item.id !== id));
+      setItems(currentItems => {
+        const itemToRemove = currentItems.find(item => item.id === id);
+        if (itemToRemove) {
+          // Trigger animation before removal
+          const updatedItems = currentItems.map(item =>
+            item.id === id ? { ...item, removing: true } : item
+          );
+          setTimeout(() => {
+            setItems(items => items.filter(item => item.id !== id));
+          }, 300);
+          return updatedItems;
+        }
+        return currentItems;
+      });
     },
     updateQuantity: (id: string, quantity: number) => {
       if (quantity <= 0) {
-        value.removeFromCart(id);
+        // Add a slight delay before removal for smooth animation
+        setTimeout(() => {
+          value.removeFromCart(id);
+        }, 150);
         return;
       }
       setItems(currentItems =>

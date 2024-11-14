@@ -18,20 +18,24 @@ export default function MobileMenu() {
     <div className="md:hidden">
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed left-1/2 top-4 -translate-x-1/2 z-50
-          p-3 rounded-full bg-theme-wine/20 backdrop-blur-md
-          hover:bg-theme-wine/30 transition-all duration-300
-          border border-white/10 shadow-lg"
+        className="fixed left-1/2 -translate-x-1/2 top-2 z-50
+          px-5 py-3 rounded-2xl
+          bg-gradient-to-r from-orange-500/5 to-orange-600/10
+          hover:from-orange-500/10 hover:to-orange-600/15
+          border border-orange-400/30
+          backdrop-blur-xl shadow-xl
+          transition-all duration-300 ease-in-out
+          flex items-center gap-3
+          hover:scale-105"
         aria-label="Open menu"
       >
-        <Bars3Icon className="w-6 h-6 text-white" />
+        <Bars3Icon className="w-5 h-5 text-orange-400" />
+        <span className="text-orange-400 text-sm font-medium tracking-wide uppercase">Menu</span>
       </button>
 
       <AnimatePresence mode="wait">
         {isOpen && (
           <motion.div
-            key="mobile-menu-container"
-            initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50"
@@ -44,18 +48,25 @@ export default function MobileMenu() {
 
             <motion.div
               key="mobile-menu-content"
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              className="fixed right-0 top-0 bottom-0 w-72 bg-black/90 
-                backdrop-blur-lg z-50 p-6 shadow-xl overflow-y-auto"
+              initial={{ y: '-100%', opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: '-100%', opacity: 0 }}
+              transition={{ type: "spring", stiffness: 100, damping: 20 }}
+              className="fixed left-0 right-0 top-0 w-full 
+                bg-gradient-to-b from-black/90 via-black/85 to-black/90
+                backdrop-blur-2xl z-50 p-6 shadow-2xl overflow-y-auto
+                border-b border-orange-500/20
+                before:absolute before:inset-0 before:z-[-1]
+                before:bg-gradient-to-b before:from-orange-500/10 before:via-orange-400/5 before:to-orange-600/10
+                before:animate-pulse before:pointer-events-none"
             >
-              <div className="flex flex-col items-center gap-6 mb-12">
+              <div className="flex flex-col items-center gap-6 mb-8">
                 <Image
                   src="/images/logo.png"
                   alt="Kusina De Amadeo Logo"
-                  width={100}
-                  height={100}
+                  width={80}
+                  height={80}
+                  priority
                   className="rounded-full border-2 border-theme-peach/20"
                 />
                 <button
@@ -68,21 +79,26 @@ export default function MobileMenu() {
                 </button>
               </div>
 
-              <nav className="space-y-3">
+              <nav className="flex flex-col items-center justify-center space-y-4">
                 {menuItems.map((item) => (
                   <motion.div
                     key={`menu-item-${item.id}`}
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3 }}
+                    transition={{ duration: 0.3, ease: "easeOut" }}
+                    className="w-full"
                   >
                     <Link
                       href={item.href}
                       onClick={() => setIsOpen(false)}
                       className="flex items-center gap-4 p-4 rounded-xl
-                        text-white/70 hover:text-white
-                        bg-white/5 hover:bg-white/10
-                        transition-all duration-300
+                        text-white/80 hover:text-white
+                        bg-gradient-to-r from-orange-500/10 to-orange-600/10
+                        hover:from-orange-500/20 hover:to-orange-600/20
+                        border border-orange-500/20 hover:border-orange-500/30
+                        transition-all duration-300 ease-in-out
+                        backdrop-blur-md
+                        transform hover:translate-x-1 hover:scale-105
                         group"
                     >
                       <span className="p-2 rounded-lg bg-theme-wine/20 

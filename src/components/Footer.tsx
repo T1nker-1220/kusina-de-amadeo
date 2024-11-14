@@ -23,10 +23,10 @@ export default function Footer() {
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-theme-peach">Contact Us</h3>
             <div className="space-y-3">
-              <a href="tel:+63909605088715" 
+              <a href="tel:+639605088715" 
                 className="flex items-center gap-2 text-theme-slate hover:text-theme-peach transition-colors">
                 <PhoneIcon className="w-5 h-5" />
-                +63 909 605 0887
+                +63 9605088715
               </a>
               <a href="tel:0468909060" 
                 className="flex items-center gap-2 text-theme-slate hover:text-theme-peach transition-colors">

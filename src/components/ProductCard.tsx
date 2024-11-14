@@ -33,6 +33,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   return (
     <motion.div
       whileHover={{ y: -5 }}
+      whileTap={{ scale: 0.98 }}
       className="group relative overflow-hidden rounded-2xl 
         bg-gradient-to-br from-theme-navy/95 via-theme-dark to-theme-navy/90
         border border-theme-slate/10 shadow-lg
@@ -72,13 +73,7 @@ export default function ProductCard({ product }: ProductCardProps) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => addToCart({ ...product, description: product.description || '' })}
-              className="w-full py-3 px-4 rounded-xl
-                bg-gradient-to-r from-theme-wine via-theme-red to-theme-wine
-                hover:from-theme-red hover:via-theme-wine hover:to-theme-red
-                text-white font-medium shadow-lg
-                hover:shadow-xl hover:shadow-theme-red/30
-                transition-all duration-300 border border-white/10
-                flex items-center justify-center gap-2"
+              className="fancy-button w-full py-3 px-4 flex items-center justify-center gap-2"
             >
               <ShoppingCartIcon className="w-5 h-5" />
               <span>Add to Cart</span>
