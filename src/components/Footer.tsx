@@ -6,6 +6,8 @@ import {
   MapPinIcon,
 } from '@heroicons/react/24/outline';
 import { FaFacebook } from 'react-icons/fa';
+import Image from 'next/image';
+
 export default function Footer() {
   const [email, setEmail] = useState('');
 
@@ -58,6 +60,20 @@ export default function Footer() {
                 <MapPinIcon className="w-5 h-5 mt-1 flex-shrink-0" />
                 <p>107 i Purok 4 Dagatan, Amadeo, Cavite</p>
               </div>
+              <a 
+                href="https://maps.app.goo.gl/nYwvNFvRrAeyDLMG7" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="block mt-4 hover:opacity-90 transition-opacity"
+              >
+                <Image
+                  src="/images/location-qr.png"
+                  alt="Google Maps QR Code"
+                  width={120}
+                  height={120}
+                  className="rounded-lg border-2 border-theme-slate/20"
+                />
+              </a>
             </div>
           </div>
 

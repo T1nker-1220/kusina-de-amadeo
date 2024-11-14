@@ -11,7 +11,7 @@ module.exports = {
       colors: {
         theme: {
           peach: '#FDA485',
-          wine: '#973C47',
+          wine: '#A34054',
           red: '#C84242',
           navy: '#242E49',
           slate: '#94A3B8',
