@@ -76,6 +76,7 @@ export default function AboutPage() {
                     src={item.image}
                     alt={`${item.year} - ${item.title}`}
                     fill
+                    sizes="(max-width: 768px) 100vw, 50vw"
                     className="object-cover"
                   />
                 </div>

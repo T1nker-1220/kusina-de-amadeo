@@ -6,7 +6,8 @@ const nextConfig = {
     formats: ['image/avif', 'image/webp'],
     remotePatterns: [],
     unoptimized: process.env.NODE_ENV === 'development',
+    domains: ['your-domain-if-using-external-images.com'], // Only needed if using external images
   },
 };
 
-module.exports = nextConfig; 
+module.exports = nextConfig;

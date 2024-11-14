@@ -9,15 +9,15 @@ export default function MobileMenu() {
   const [isOpen, setIsOpen] = useState(false);
 
   const menuItems = [
-    { href: '/', label: 'Home', icon: <HomeIcon className="w-6 h-6" /> },
-    { href: '/menu', label: 'Menu', icon: <BookOpenIcon className="w-6 h-6" /> },
-    { href: '/about', label: 'About', icon: <InformationCircleIcon className="w-6 h-6" /> },
+    { id: 1, href: '/', label: 'Home', icon: <HomeIcon className="w-6 h-6" /> },
+    { id: 2, href: '/menu', label: 'Menu', icon: <BookOpenIcon className="w-6 h-6" /> },
+    { id: 3, href: '/about', label: 'About', icon: <InformationCircleIcon className="w-6 h-6" /> },
   ];
 
   return (
     <div className="md:hidden">
       <button
-        onClick={(e: React.MouseEvent<HTMLButtonElement>) => setIsOpen(true)}
+        onClick={() => setIsOpen(true)}
         className="fixed left-1/2 top-4 -translate-x-1/2 z-50
           p-3 rounded-full bg-theme-wine/20 backdrop-blur-md
           hover:bg-theme-wine/30 transition-all duration-300
@@ -27,18 +27,23 @@ export default function MobileMenu() {
         <Bars3Icon className="w-6 h-6 text-white" />
       </button>
 
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {isOpen && (
-          <>
+          <motion.div
+            key="mobile-menu-container"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50"
+          >
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50"
+              key="mobile-menu-overlay"
+              className="fixed inset-0 bg-black/80 backdrop-blur-sm"
               onClick={() => setIsOpen(false)}
             />
 
             <motion.div
+              key="mobile-menu-content"
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
@@ -66,7 +71,7 @@ export default function MobileMenu() {
               <nav className="space-y-3">
                 {menuItems.map((item) => (
                   <motion.div
-                    key={item.href}
+                    key={`menu-item-${item.id}`}
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.3 }}
@@ -90,7 +95,7 @@ export default function MobileMenu() {
                 ))}
               </nav>
             </motion.div>
-          </>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

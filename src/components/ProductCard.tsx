@@ -34,22 +34,35 @@ export default function ProductCard({ product }: ProductCardProps) {
     <motion.div
       whileHover={{ y: -5 }}
       className="group relative overflow-hidden rounded-2xl 
-        bg-theme-navy border border-theme-slate/30 
-        hover:border-theme-peach/30 transition-all duration-300"
+        bg-gradient-to-br from-theme-navy/95 via-theme-dark to-theme-navy/90
+        border border-theme-slate/10 shadow-lg
+        hover:shadow-2xl hover:shadow-theme-peach/20
+        hover:border-theme-peach/30 transition-all duration-500"
     >
-      <div className="aspect-square relative">
+      <div className="aspect-square relative overflow-hidden">
         <img
           src={product.image}
           alt={product.name}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover brightness-100 contrast-100
+            transform scale-100 group-hover:scale-110 
+            transition-all duration-700"
         />
+        <div className="absolute inset-0 bg-gradient-to-t 
+          from-theme-dark/80 via-transparent to-transparent 
+          opacity-50 group-hover:opacity-30 transition-opacity duration-300" />
       </div>
       
-      <div className="p-6 space-y-4">
-        <h3 className="text-lg font-semibold text-theme-peach">
-          {product.name}
-        </h3>
-        <p className="text-theme-slate">₱{product.price.toFixed(2)}</p>
+      <div className="p-6 space-y-4 relative">
+        <div className="space-y-2">
+          <h3 className="text-xl font-bold text-white 
+            group-hover:text-theme-peach transition-colors duration-300">
+            {product.name}
+          </h3>
+          <p className="text-lg font-bold flex items-baseline gap-1">
+            <span className="text-theme-slate">₱</span>
+            <span className="text-white">{product.price.toFixed(2)}</span>
+          </p>
+        </div>
         
         <AnimatePresence mode="wait">
           {!inCart ? (
@@ -59,9 +72,12 @@ export default function ProductCard({ product }: ProductCardProps) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => addToCart({ ...product, description: product.description || '' })}
-              className="w-full py-2.5 px-4 rounded-lg
-                bg-theme-wine hover:bg-theme-red
-                text-white transition-colors
+              className="w-full py-3 px-4 rounded-xl
+                bg-gradient-to-r from-theme-wine via-theme-red to-theme-wine
+                hover:from-theme-red hover:via-theme-wine hover:to-theme-red
+                text-white font-medium shadow-lg
+                hover:shadow-xl hover:shadow-theme-red/30
+                transition-all duration-300 border border-white/10
                 flex items-center justify-center gap-2"
             >
               <ShoppingCartIcon className="w-5 h-5" />
@@ -73,10 +89,11 @@ export default function ProductCard({ product }: ProductCardProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="flex items-center gap-2"
+              className="flex items-center gap-3"
             >
-              <div className="flex-1 flex items-center gap-2 p-1 
-                rounded-lg bg-theme-wine/20 backdrop-blur-sm">
+              <div className="flex-1 flex items-center gap-2 p-2 
+                rounded-xl bg-gradient-to-br from-theme-wine/30 to-theme-dark/50 
+                backdrop-blur-sm border border-theme-wine/30">
                 <button
                   onClick={() => handleQuantityChange(-1)}
                   className="p-2 rounded-lg bg-theme-wine hover:bg-theme-red 
@@ -101,8 +118,9 @@ export default function ProductCard({ product }: ProductCardProps) {
               </div>
               <button
                 onClick={() => removeFromCart(product.id)}
-                className="p-2 rounded-lg bg-red-500/20 hover:bg-red-500/30 
-                  transition-colors"
+                className="p-2 rounded-lg bg-gradient-to-br from-red-500/30 to-theme-dark/50
+                  hover:from-red-500/40 hover:to-theme-dark/60
+                  transition-all duration-300 border border-red-500/20"
                 title="Remove from cart"
                 type="button"
               >
