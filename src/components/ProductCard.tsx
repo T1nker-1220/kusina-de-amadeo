@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useCart } from '@/context/CartContext';
 import { Product } from '@/types';
 import { ShoppingCartIcon, PlusIcon, MinusIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface ProductCardProps {
   product: Product;
@@ -19,7 +19,7 @@ export default function ProductCard({ product }: ProductCardProps) {
     try {
       const newQuantity = quantity + change;
       if (newQuantity > 0) {
-        updateQuantity((product.id), newQuantity);
+        updateQuantity(product.id, newQuantity);
       }
     } catch (error) {
       setError('Error updating quantity');
@@ -51,16 +51,60 @@ export default function ProductCard({ product }: ProductCardProps) {
         </h3>
         <p className="text-theme-slate">₱{product.price.toFixed(2)}</p>
         
-        <button
-          onClick={() => addToCart(product)}
-          className="w-full py-2.5 px-4 rounded-lg
-            bg-theme-wine hover:bg-theme-red
-            text-white transition-colors
-            flex items-center justify-center gap-2"
-        >
-          <ShoppingCartIcon className="w-5 h-5" />
-          <span>Add to Cart</span>
-        </button>
+        <AnimatePresence mode="wait">
+          {!inCart ? (
+            <motion.button
+              key="add"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => addToCart(product)}
+              className="w-full py-2.5 px-4 rounded-lg
+                bg-theme-wine hover:bg-theme-red
+                text-white transition-colors
+                flex items-center justify-center gap-2"
+            >
+              <ShoppingCartIcon className="w-5 h-5" />
+              <span>Add to Cart</span>
+            </motion.button>
+          ) : (
+            <motion.div
+              key="controls"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex items-center gap-2"
+            >
+              <div className="flex-1 flex items-center gap-2 p-1 
+                rounded-lg bg-theme-wine/20 backdrop-blur-sm">
+                <button
+                  onClick={() => handleQuantityChange(-1)}
+                  className="p-2 rounded-lg bg-theme-wine hover:bg-theme-red 
+                    transition-colors"
+                >
+                  <MinusIcon className="w-4 h-4 text-white" />
+                </button>
+                <span className="flex-1 text-center text-white font-medium">
+                  {quantity}
+                </span>
+                <button
+                  onClick={() => handleQuantityChange(1)}
+                  className="p-2 rounded-lg bg-theme-wine hover:bg-theme-red 
+                    transition-colors"
+                >
+                  <PlusIcon className="w-4 h-4 text-white" />
+                </button>
+              </div>
+              <button
+                onClick={() => removeFromCart(product.id)}
+                className="p-2 rounded-lg bg-red-500/20 hover:bg-red-500/30 
+                  transition-colors"
+              >
+                <XMarkIcon className="w-5 h-5 text-red-400" />
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </motion.div>
   );

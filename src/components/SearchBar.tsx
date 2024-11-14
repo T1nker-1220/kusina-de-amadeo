@@ -1,6 +1,6 @@
 'use client';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
@@ -9,9 +9,13 @@ interface SearchBarProps {
 export default function SearchBar({ onSearch }: SearchBarProps) {
   const [query, setQuery] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  // Call onSearch whenever query changes
+  useEffect(() => {
     onSearch(query);
+  }, [query, onSearch]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault(); // Prevent form submission since we're searching on every change
   };
 
   return (
@@ -33,4 +37,4 @@ export default function SearchBar({ onSearch }: SearchBarProps) {
       </div>
     </form>
   );
-} 
+}

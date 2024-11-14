@@ -4,21 +4,21 @@ import Image from 'next/image';
 
 const timeline = [
   {
-    year: 2021,
+    year: 2022,
     title: "Our Beginning",
-    description: "Kusina De Amadeo opened its doors in the heart of the community, starting with a simple dream of serving authentic Filipino cuisine. Despite the challenges of the pandemic, we persevered with takeout and delivery services.",
-    image: "/images/about/2021-opening.jpg",
+    description: "Kusina De Amadeo started its journey in the heart of Amadeo city near Savemore, with a mission to serve authentic Filipino cuisine to our community. We quickly became known for our affordable and delicious meals.",
+    image: "/images/about/2022.jpg",
     achievements: [
-      "Successfully launched during pandemic",
+      "Successfully opened near Savemore",
       "Established core menu items",
-      "Built loyal customer base"
+      "Built initial customer base"
     ]
   },
   {
-    year: 2022,
+    year: 2023,
     title: "Growing Together",
-    description: "As restrictions eased, we expanded our services and menu offerings. Our commitment to quality and value helped us grow, becoming a favorite spot for both breakfast and lunch crowds.",
-    image: "/images/about/2022-growth.jpg",
+    description: "As our reputation grew, more customers discovered our authentic Filipino dishes. Our location near Savemore helped us reach a diverse customer base, from office workers to families looking for quality meals.",
+    image: "/images/about/2023.jpg",
     achievements: [
       "Expanded menu selection",
       "Introduced new silog varieties",
@@ -26,29 +26,17 @@ const timeline = [
     ]
   },
   {
-    year: 2023,
-    title: "Community Focus",
-    description: "We strengthened our roots in the community, participating in local events and introducing budget-friendly meals to help during challenging economic times.",
-    image: "/images/about/2023-community.jpg",
-    achievements: [
-      "Launched budget meal options",
-      "Participated in community events",
-      "Improved ordering system"
-    ]
-  },
-  {
     year: 2024,
-    title: "Innovation & Tradition",
-    description: "Today, we continue to innovate while staying true to our roots. Our focus remains on providing delicious, affordable Filipino cuisine while embracing modern conveniences for our customers.",
-    image: "/images/about/2024-current.jpg",
+    title: "A New Chapter",
+    description: "We moved to our new location beside our house, creating a more intimate and family-oriented dining experience. This move allows us to serve our community with even more personal attention while maintaining our commitment to quality and affordability.",
+    image: "/images/about/2024.jpg",
     achievements: [
-      "Introduced online ordering",
-      "Enhanced menu presentation",
+      "Relocated to new location",
+      "Enhanced dining experience",
       "Maintained affordable pricing"
     ]
   }
 ];
-
 export default function AboutPage() {
   return (
     <div className="min-h-screen w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
