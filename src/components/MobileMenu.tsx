@@ -43,7 +43,7 @@ export default function MobileMenu() {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               className="fixed right-0 top-0 bottom-0 w-72 bg-black/90 
-                backdrop-blur-lg z-50 p-6 shadow-xl"
+                backdrop-blur-lg z-50 p-6 shadow-xl overflow-y-auto"
             >
               <div className="flex flex-col items-center gap-6 mb-12">
                 <Image

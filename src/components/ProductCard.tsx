@@ -58,7 +58,7 @@ export default function ProductCard({ product }: ProductCardProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => addToCart(product)}
+              onClick={() => addToCart({ ...product, description: product.description || '' })}
               className="w-full py-2.5 px-4 rounded-lg
                 bg-theme-wine hover:bg-theme-red
                 text-white transition-colors
@@ -81,6 +81,8 @@ export default function ProductCard({ product }: ProductCardProps) {
                   onClick={() => handleQuantityChange(-1)}
                   className="p-2 rounded-lg bg-theme-wine hover:bg-theme-red 
                     transition-colors"
+                  title="Decrease quantity"
+                  type="button"
                 >
                   <MinusIcon className="w-4 h-4 text-white" />
                 </button>
@@ -91,6 +93,8 @@ export default function ProductCard({ product }: ProductCardProps) {
                   onClick={() => handleQuantityChange(1)}
                   className="p-2 rounded-lg bg-theme-wine hover:bg-theme-red 
                     transition-colors"
+                  title="Increase quantity"
+                  type="button"
                 >
                   <PlusIcon className="w-4 h-4 text-white" />
                 </button>
@@ -99,6 +103,8 @@ export default function ProductCard({ product }: ProductCardProps) {
                 onClick={() => removeFromCart(product.id)}
                 className="p-2 rounded-lg bg-red-500/20 hover:bg-red-500/30 
                   transition-colors"
+                title="Remove from cart"
+                type="button"
               >
                 <XMarkIcon className="w-5 h-5 text-red-400" />
               </button>

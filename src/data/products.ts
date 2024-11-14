@@ -231,4 +231,4 @@ export const categories = [
   'silog-meals',
   'ala-carte',
   'beverages'
-]; 
+];

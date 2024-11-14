@@ -77,6 +77,7 @@ export default function CartPage() {
                         onClick={() => updateQuantity(item.id, item.quantity - 1)}
                         className="p-2 rounded-lg bg-theme-wine hover:bg-theme-red 
                           transition-colors"
+                        title="Decrease quantity"
                       >
                         <MinusIcon className="w-4 h-4 text-white" />
                       </button>
@@ -87,6 +88,7 @@ export default function CartPage() {
                         onClick={() => updateQuantity(item.id, item.quantity + 1)}
                         className="p-2 rounded-lg bg-theme-wine hover:bg-theme-red 
                           transition-colors"
+                        title="Increase quantity"
                       >
                         <PlusIcon className="w-4 h-4 text-white" />
                       </button>
@@ -95,6 +97,7 @@ export default function CartPage() {
                       onClick={() => removeFromCart(item.id)}
                       className="p-2 rounded-lg text-red-400 hover:bg-red-500/20
                         transition-colors"
+                      title="Remove from cart"
                     >
                       <TrashIcon className="w-5 h-5" />
                     </button>
