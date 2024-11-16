@@ -38,3 +38,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Firebase Admin SDK
+kusina-de-amadeo-7cfc1-firebase-adminsdk-gjssy-2597c265eb.json
+*firebase-adminsdk*.json
