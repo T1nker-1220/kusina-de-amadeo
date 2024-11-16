@@ -53,7 +53,7 @@ export default function Navbar() {
               />
             </motion.div>
             <motion.span 
-              className="animated-text font-bold"
+              className="animated-text font-bold hidden md:inline"
             >
               Kusina De Amadeo
             </motion.span>

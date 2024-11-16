@@ -152,41 +152,41 @@ export default function CartPage() {
                   </div>
                 </motion.div>
               ))}
+
+              {/* Checkout Button */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="fixed bottom-0 left-0 right-0 bg-theme-navy/95 backdrop-blur-xl 
+                  border-t border-theme-slate/20 p-4 md:p-6"
+              >
+                <div className="max-w-4xl mx-auto">
+                  <div className="flex flex-col gap-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-lg font-medium text-white/70">Total</span>
+                      <span className="text-2xl font-bold text-white">₱{getTotal().toFixed(2)}</span>
+                    </div>
+                    <Link href="/checkout" className="block">
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="w-full py-4 rounded-xl 
+                          bg-gradient-to-r from-theme-wine via-theme-red to-theme-wine
+                          hover:from-theme-red hover:via-theme-wine hover:to-theme-red
+                          text-white font-semibold text-lg
+                          shadow-lg shadow-theme-wine/30
+                          border border-white/10
+                          transition-all duration-300
+                          flex items-center justify-center gap-3"
+                      >
+                        Proceed to Checkout
+                      </motion.button>
+                    </Link>
+                  </div>
+                </div>
+              </motion.div>
             </motion.div>
           </AnimatePresence>
-
-          {/* Total and Checkout */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mt-8 rounded-2xl bg-theme-navy/30 backdrop-blur-lg 
-              border border-theme-slate/20 p-8 shadow-lg"
-          >
-            <div className="flex justify-between items-center text-xl mb-6">
-              <span className="text-white/70">Total Amount</span>
-              <motion.span 
-                key={getTotal()}
-                initial={{ scale: 1.2 }}
-                animate={{ scale: 1 }}
-                className="text-theme-peach font-bold text-2xl"
-              >
-                ₱{getTotal().toFixed(2)}
-              </motion.span>
-            </div>
-            <motion.button 
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="w-full py-4 rounded-xl 
-                bg-gradient-to-r from-theme-wine via-theme-red to-theme-wine
-                hover:from-theme-red hover:via-theme-wine hover:to-theme-red
-                text-white font-semibold text-lg
-                shadow-lg shadow-theme-wine/30 
-                border border-white/10
-                transition-all duration-300"
-            >
-              Proceed to Checkout
-            </motion.button>
-          </motion.div>
         </motion.div>
       </div>
     </div>
