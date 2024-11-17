@@ -1,111 +1,158 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
+import React, { useEffect, useState } from 'react';
+import { collection, query, orderBy, onSnapshot, where } from 'firebase/firestore';
 import { db } from '@/config/firebase';
-import AdminLayout from '@/components/admin/AdminLayout';
+import { logger } from '@/utils/logger';
+import { OrderDetails } from '@/services/orders';
+import { motion, AnimatePresence } from 'framer-motion';
 
-interface OrderItem {
-  name: string;
-  price: number;
-  quantity: number;
-}
-
-interface Order {
-  id: string;
-  customerName: string;
-  orderDate: {
-    seconds: number;
-    nanoseconds: number;
-  };
-  total: number;
-  status: string;
-  items: OrderItem[];
-  paymentStatus: string;
-}
-
-export default function OrdersClient() {
-  const [orders, setOrders] = useState<Order[]>([]);
+const OrdersClient = () => {
+  const [orders, setOrders] = useState<OrderDetails[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('all');
 
   useEffect(() => {
-    const q = query(collection(db, 'orders'), orderBy('orderDate', 'desc'));
-    
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const ordersData: Order[] = [];
-      querySnapshot.forEach((doc) => {
-        ordersData.push({ id: doc.id, ...doc.data() } as Order);
-      });
-      setOrders(ordersData);
-      setLoading(false);
-    });
+    try {
+      const ordersQuery = query(
+        collection(db, 'orders'),
+        orderBy('createdAt', 'desc')
+      );
 
-    return () => unsubscribe();
+      const unsubscribe = onSnapshot(ordersQuery, (snapshot) => {
+        const ordersData = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data()
+        })) as OrderDetails[];
+
+        setOrders(ordersData);
+        setLoading(false);
+      }, (error) => {
+        logger.error('Error fetching orders:', error);
+        setError('Failed to load orders. Please try again.');
+        setLoading(false);
+      });
+
+      return () => unsubscribe();
+    } catch (error) {
+      logger.error('Error setting up orders listener:', error);
+      setError('Failed to initialize orders tracking.');
+      setLoading(false);
+    }
   }, []);
 
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'processing':
-        return 'bg-blue-100 text-blue-800';
-      case 'completed':
-        return 'bg-green-100 text-green-800';
-      case 'cancelled':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
+  const filteredOrders = orders.filter(order => {
+    if (filter === 'all') return true;
+    if (filter === 'pending') return ['pending', 'preparing', 'ready'].includes(order.orderStatus);
+    if (filter === 'completed') return ['delivered', 'cancelled'].includes(order.orderStatus);
+    return true;
+  });
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center text-red-500 py-8">
+        <p>{error}</p>
+        <button 
+          onClick={() => window.location.reload()} 
+          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <AdminLayout>
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-6">Orders Management</h1>
-        
-        {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full bg-white border border-gray-300">
-              <thead>
-                <tr className="bg-gray-100">
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {orders.map((order) => (
-                  <tr key={order.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{order.id}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{order.customerName}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(order.orderDate.seconds * 1000).toLocaleString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">₱{order.total.toFixed(2)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(order.status)}`}>
-                        {order.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(order.paymentStatus)}`}>
-                        {order.paymentStatus}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-2xl font-bold">Orders Management</h1>
+        <div className="flex gap-2">
+          {['all', 'pending', 'completed'].map((filterOption) => (
+            <button
+              key={filterOption}
+              onClick={() => setFilter(filterOption as typeof filter)}
+              className={`px-4 py-2 rounded ${
+                filter === filterOption
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              {filterOption.charAt(0).toUpperCase() + filterOption.slice(1)}
+            </button>
+          ))}
+        </div>
       </div>
-    </AdminLayout>
+
+      <AnimatePresence>
+        <div className="grid gap-6">
+          {filteredOrders.map((order) => (
+            <motion.div
+              key={order.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="bg-white rounded-lg shadow-md p-6"
+            >
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <h3 className="text-lg font-semibold">
+                    Order #{order.orderNumber}
+                  </h3>
+                  <p className="text-gray-600">
+                    {new Date(order.createdAt?.seconds * 1000).toLocaleString()}
+                  </p>
+                </div>
+                <div className={`
+                  px-3 py-1 rounded-full text-sm font-medium
+                  ${order.orderStatus === 'delivered' ? 'bg-green-100 text-green-800' :
+                    order.orderStatus === 'cancelled' ? 'bg-red-100 text-red-800' :
+                    'bg-yellow-100 text-yellow-800'}
+                `}>
+                  {order.orderStatus.charAt(0).toUpperCase() + order.orderStatus.slice(1)}
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <h4 className="font-medium mb-2">Customer Details</h4>
+                  <p>{order.contactInfo.email}</p>
+                  <p>{order.contactInfo.phone}</p>
+                </div>
+
+                <div>
+                  <h4 className="font-medium mb-2">Items</h4>
+                  <ul className="space-y-2">
+                    {order.items.map((item, index) => (
+                      <li key={index} className="flex justify-between">
+                        <span>{item.name} x{item.quantity}</span>
+                        <span>₱{item.price * item.quantity}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="pt-4 border-t">
+                  <div className="flex justify-between font-semibold">
+                    <span>Total Amount</span>
+                    <span>₱{order.totalAmount}</span>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </AnimatePresence>
+    </div>
   );
-}
+};
+
+export default OrdersClient;

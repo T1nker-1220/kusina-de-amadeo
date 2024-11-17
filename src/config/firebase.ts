@@ -1,6 +1,8 @@
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
+import { getAuth } from 'firebase/auth';
+import { getFunctions } from 'firebase/functions';
 import { getMessaging, getToken, onMessage, Messaging } from 'firebase/messaging';
 
 const firebaseConfig = {
@@ -21,8 +23,11 @@ if (!getApps().length) {
   app = getApps()[0];
 }
 
+// Initialize services
 export const db = getFirestore(app);
 export const storage = getStorage(app);
+export const auth = getAuth(app);
+export const functions = getFunctions(app);
 
 // Messaging setup (only in browser)
 let messaging: Messaging | null = null;
@@ -30,12 +35,12 @@ if (typeof window !== 'undefined') {
   try {
     messaging = getMessaging(app);
   } catch (error) {
-    console.error('Firebase messaging error:', error);
+    console.error('Failed to initialize Firebase Messaging:', error);
   }
 }
 
 // Function to get FCM token
-export const getFCMToken = async () => {
+export async function getFCMToken() {
   if (!messaging) return null;
   
   try {
@@ -45,24 +50,24 @@ export const getFCMToken = async () => {
     
     if (currentToken) {
       return currentToken;
+    } else {
+      console.log('No registration token available');
+      return null;
     }
-    
-    console.log('No registration token available.');
-    return null;
   } catch (error) {
     console.error('An error occurred while retrieving token:', error);
     return null;
   }
-};
+}
 
 // Function to handle incoming messages
 export const onMessageListener = () =>
   new Promise((resolve) => {
-    if (messaging) {
-      onMessage(messaging, (payload) => {
-        resolve(payload);
-      });
-    }
+    if (!messaging) return;
+    
+    onMessage(messaging, (payload) => {
+      resolve(payload);
+    });
   });
 
 export { app, messaging };

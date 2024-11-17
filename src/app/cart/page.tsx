@@ -1,12 +1,25 @@
 'use client';
-import { useCart } from '@/context/CartContext';
+import { useCart } from '@/hooks/useCart';
 import { MinusIcon, PlusIcon, TrashIcon, ShoppingBagIcon, BookOpenIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '@/hooks/useAuth';
+import { useRouter } from 'next/navigation';
 
 export default function CartPage() {
   const { items, removeFromCart, updateQuantity, getTotal } = useCart();
+  const { user } = useAuth();
+  const router = useRouter();
+
+  const handleCheckout = () => {
+    if (!user) {
+      // Redirect to sign in page with return URL
+      router.push('/sign-in?redirect=/checkout');
+      return;
+    }
+    router.push('/checkout');
+  };
 
   if (items.length === 0) {
     return (
@@ -169,22 +182,21 @@ export default function CartPage() {
                       <span className="text-lg font-medium text-white/70">Total</span>
                       <span className="text-2xl font-bold text-white">₱{getTotal().toFixed(2)}</span>
                     </div>
-                    <Link href="/checkout" className="block">
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="w-full py-4 rounded-xl 
-                          bg-gradient-to-r from-theme-wine via-theme-red to-theme-wine
-                          hover:from-theme-red hover:via-theme-wine hover:to-theme-red
-                          text-white font-semibold text-lg
-                          shadow-lg shadow-theme-wine/30
-                          border border-white/10
-                          transition-all duration-300
-                          flex items-center justify-center gap-3"
-                      >
-                        Proceed to Checkout
-                      </motion.button>
-                    </Link>
+                    <motion.button
+                      onClick={handleCheckout}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="w-full py-4 rounded-xl 
+                        bg-gradient-to-r from-theme-wine via-theme-red to-theme-wine
+                        hover:from-theme-red hover:via-theme-wine hover:to-theme-red
+                        text-white font-semibold text-lg
+                        shadow-lg shadow-theme-wine/30
+                        border border-white/10
+                        transition-all duration-300
+                        flex items-center justify-center gap-3"
+                    >
+                      {user ? 'Proceed to Checkout' : 'Sign in to Checkout'}
+                    </motion.button>
                   </div>
                 </div>
               </motion.div>

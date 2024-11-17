@@ -29,22 +29,48 @@ interface OrderStatusClientProps {
   orderId: string;
 }
 
-const formatDate = (timestamp: Timestamp) => {
-  const date = timestamp.toDate();
-  return new Intl.DateTimeFormat('en-US', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  }).format(date);
+const formatDate = (timestamp: Timestamp | null) => {
+  if (!timestamp) return 'N/A';
+  try {
+    const date = timestamp.toDate();
+    return new Intl.DateTimeFormat('en-US', {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    }).format(date);
+  } catch (error) {
+    logger.error('Error formatting date:', error);
+    return 'N/A';
+  }
 };
 
-const getStatusColor = (status: OrderData['status']) => {
+const getStatusColor = (status: OrderData['status'] | undefined) => {
   const colors = {
     pending: 'bg-yellow-100 text-yellow-800',
     processing: 'bg-blue-100 text-blue-800',
     completed: 'bg-green-100 text-green-800',
     cancelled: 'bg-red-100 text-red-800',
   };
-  return colors[status] || colors.pending;
+  return colors[status || 'pending'] || colors.pending;
+};
+
+const formatStatus = (status: string | undefined): string => {
+  if (!status) return 'Pending';
+  try {
+    return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+  } catch (error) {
+    logger.error('Error formatting status:', error);
+    return 'Pending';
+  }
+};
+
+const formatPrice = (amount: number | undefined): string => {
+  if (typeof amount !== 'number') return '₱0.00';
+  try {
+    return `₱${amount.toFixed(2)}`;
+  } catch (error) {
+    logger.error('Error formatting price:', error);
+    return '₱0.00';
+  }
 };
 
 export default function OrderStatusClient({ orderId }: OrderStatusClientProps) {
@@ -122,14 +148,16 @@ export default function OrderStatusClient({ orderId }: OrderStatusClientProps) {
               <p className="text-gray-600">
                 Status: 
                 <span className={`ml-2 px-2 py-1 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}>
-                  {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                  {formatStatus(order.status)}
                 </span>
               </p>
-              <p className="text-gray-600">Total Amount: <span className="text-gray-900">₱{order.totalAmount.toFixed(2)}</span></p>
+              <p className="text-gray-600">Total Amount: <span className="text-gray-900">{formatPrice(order.totalAmount)}</span></p>
               {order.paymentStatus && (
                 <p className="text-gray-600">
                   Payment Status: 
-                  <span className="ml-2 capitalize">{order.paymentStatus}</span>
+                  <span className={`ml-2 px-2 py-1 rounded-full text-sm font-medium ${getStatusColor(order.paymentStatus)}`}>
+                    {formatStatus(order.paymentStatus)}
+                  </span>
                 </p>
               )}
               {order.paymentMethod && (
@@ -151,41 +179,37 @@ export default function OrderStatusClient({ orderId }: OrderStatusClientProps) {
         </div>
 
         <div>
-          <h2 className="text-lg font-semibold mb-2">Order Items</h2>
-          <div className="border rounded-lg overflow-hidden">
-            <div className="divide-y">
-              {order.items.map((item, index) => (
-                <div key={item.id || index} className="flex justify-between p-3 hover:bg-gray-50">
-                  <div className="flex items-center">
-                    {item.imageUrl && (
-                      <img 
-                        src={item.imageUrl} 
-                        alt={item.name}
-                        className="w-12 h-12 object-cover rounded-md mr-3"
-                      />
-                    )}
-                    <div>
-                      <span className="font-medium">{item.name}</span>
-                      <span className="text-gray-500 ml-2">x {item.quantity}</span>
-                    </div>
+          <h2 className="text-lg font-semibold mb-4">Order Items</h2>
+          <div className="space-y-3">
+            {order.items.map((item) => (
+              <div key={item.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-center gap-3">
+                  {item.imageUrl && (
+                    <img 
+                      src={item.imageUrl} 
+                      alt={item.name} 
+                      className="w-12 h-12 object-cover rounded"
+                    />
+                  )}
+                  <div>
+                    <p className="font-medium">{item.name}</p>
+                    <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
                   </div>
-                  <span className="text-gray-900">₱{(item.price * item.quantity).toFixed(2)}</span>
                 </div>
-              ))}
-            </div>
-            <div className="bg-gray-50 p-3 flex justify-between font-semibold">
-              <span>Total</span>
-              <span>₱{order.totalAmount.toFixed(2)}</span>
-            </div>
+                <div className="text-right">
+                  <p className="font-medium">{formatPrice(item.price * item.quantity)}</p>
+                  <p className="text-sm text-gray-500">{formatPrice(item.price)} each</p>
+                </div>
+              </div>
+            ))}
           </div>
+          {order.notes && (
+            <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+              <h3 className="font-medium mb-2">Order Notes</h3>
+              <p className="text-gray-600">{order.notes}</p>
+            </div>
+          )}
         </div>
-
-        {order.notes && (
-          <div className="mt-4">
-            <h2 className="text-lg font-semibold mb-2">Notes</h2>
-            <p className="text-gray-600">{order.notes}</p>
-          </div>
-        )}
       </div>
     </div>
   );

@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useCart } from '@/context/CartContext';
+import { useCart } from '@/hooks/useCart';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ShoppingCartIcon, 

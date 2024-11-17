@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import { useCart } from '@/context/CartContext';
+import { useCart } from '@/hooks/useCart';
 import { motion } from 'framer-motion';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/config/firebase';

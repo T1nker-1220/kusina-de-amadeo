@@ -159,18 +159,35 @@ body {
       hover:after:opacity-100 after:transition-opacity
       after:duration-500 overflow-hidden;
   }
-}
 
-@keyframes gradient {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
+  /* Input Fields */
+  .input-field {
+    @apply w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent;
+  }
 
-.animate-gradient {
-  animation: gradient 3s linear infinite;
-}
+  .input-field:disabled {
+    @apply bg-gray-100 cursor-not-allowed;
+  }
 
-.transition-smooth {
-  @apply transition-all duration-300 ease-out;
+  select.input-field {
+    @apply bg-white;
+  }
+
+  textarea.input-field {
+    @apply resize-none;
+  }
+
+  @keyframes gradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  .animate-gradient {
+    animation: gradient 3s linear infinite;
+  }
+
+  .transition-smooth {
+    @apply transition-all duration-300 ease-out;
+  }
 }
