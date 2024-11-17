@@ -1,52 +1,41 @@
-import OrderStatusClient from './OrderStatusClient';
+import { Suspense } from 'react';
+import { Metadata } from 'next';
+import OrderStatusClient from '../../../components/OrderStatusClient';
 
-interface Order {
-  customerName: string;
-  phone: string;
-  address: string;
-  items: OrderItem[];
-  total: number;
-  paymentMethod: string;
-  orderStatus: string;
-  paymentStatus: string;
-  orderType: 'now' | 'preorder';
-  preorderDetails?: {
-    deliveryDate: string;
-    deliveryTime: string;
-  };
-  orderDate: {
-    seconds: number;
-    nanoseconds: number;
+type PageProps = {
+  params: Promise<{
+    orderId: string;
+  }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
+
+export async function generateMetadata(
+  { params }: PageProps
+): Promise<Metadata> {
+  const { orderId } = await params;
+  
+  return {
+    title: `Order Status ${orderId} | Kusina De Amadeo`,
+    description: `Check the status of your order ${orderId} at Kusina De Amadeo`,
   };
 }
 
-export default function OrderStatus({ params }: { params: { orderId: string } }) {
+export default async function OrderStatus({ params, searchParams }: PageProps) {
+  const { orderId } = await params;
+
+  if (!orderId) {
+    return <div>Invalid order ID</div>;
+  }
+
   return (
-    <OrderStatusClient orderId={params.orderId}>
-      {/* Order Type and Delivery Details */}
-      <div className="mb-6">
-        <h3 className="text-lg font-semibold mb-2">Delivery Details</h3>
-        <div className="bg-white/5 rounded-lg p-4 space-y-2">
-          <div className="flex justify-between items-center">
-            <span className="text-gray-400">Order Type:</span>
-            <span className="font-medium">
-              {order.orderType === 'now' ? 'Order Now' : 'Pre-order'}
-            </span>
-          </div>
-          {order.orderType === 'preorder' && order.preorderDetails && (
-            <>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-400">Delivery Date:</span>
-                <span className="font-medium">{order.preorderDetails.deliveryDate}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-400">Delivery Time:</span>
-                <span className="font-medium">{order.preorderDetails.deliveryTime}</span>
-              </div>
-            </>
-          )}
+    <main className="container mx-auto px-4 py-8">
+      <Suspense fallback={
+        <div className="flex justify-center items-center min-h-[400px]">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
         </div>
-      </div>
-    </OrderStatusClient>
+      }>
+        <OrderStatusClient orderId={orderId} />
+      </Suspense>
+    </main>
   );
 }

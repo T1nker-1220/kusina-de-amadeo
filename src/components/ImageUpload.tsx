@@ -1,13 +1,19 @@
 'use client';
 
+import React, { FC, useCallback, useState } from 'react';
 import { CldUploadWidget } from 'next-cloudinary';
 import Image from 'next/image';
-import { useCallback, useState } from 'react';
 import { TbPhotoPlus, TbX } from 'react-icons/tb';
-import { BiLoading } from 'react-icons/bi';
+import { BiLoaderAlt } from 'react-icons/bi';
 
-declare global {
-  var cloudinary: any;
+interface CloudinaryUploadWidgetInfo {
+  secure_url: string;
+  public_id: string;
+}
+
+interface CloudinaryWidget {
+  open: () => void;
+  destroy: () => void;
 }
 
 interface ImageUploadProps {
@@ -15,7 +21,7 @@ interface ImageUploadProps {
   value: string;
 }
 
-const ImageUpload: React.FC<ImageUploadProps> = ({
+const ImageUpload: FC<ImageUploadProps> = ({
   onChange,
   value
 }) => {
@@ -25,7 +31,9 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
   const handleUpload = useCallback((result: any) => {
     setIsUploading(false);
     setError(null);
-    onChange(result.info.secure_url);
+    if (result?.info?.secure_url) {
+      onChange(result.info.secure_url);
+    }
   }, [onChange]);
 
   const handleError = useCallback((error: any) => {
@@ -34,17 +42,11 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     console.error('Upload error:', error);
   }, []);
 
-  const handleStartUpload = useCallback(() => {
-    setIsUploading(true);
-    setError(null);
-  }, []);
-
   return (
     <div className="space-y-2">
       <CldUploadWidget 
         onUpload={handleUpload}
         onError={handleError}
-        onStart={handleStartUpload}
         uploadPreset="payment_proof"
         options={{
           maxFiles: 1,
@@ -70,22 +72,23 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
               inProgress: "#0078FF",
               complete: "#20B832",
               sourceBg: "#E4EBF1"
-            },
-            fonts: {
-              default: null,
-              "'Poppins', sans-serif": {
-                url: "https://fonts.googleapis.com/css?family=Poppins",
-                active: true
-              }
             }
           }
         }}
       >
-        {({ open }) => {
+        {({ open }: CloudinaryWidget) => {
+          const handleClick = () => {
+            if (!isUploading) {
+              setIsUploading(true);
+              setError(null);
+              open?.();
+            }
+          };
+          
           return (
             <div className="relative">
               <div
-                onClick={() => !isUploading && open?.()}
+                onClick={handleClick}
                 className={`
                   relative
                   cursor-pointer
@@ -114,9 +117,11 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
                   group
                 `}
               >
+                {isUploading && (
+                  <BiLoaderAlt className="h-6 w-6 animate-spin text-gray-400" />
+                )}
                 {isUploading ? (
                   <div className="flex flex-col items-center justify-center space-y-3">
-                    <BiLoading className="w-10 h-10 animate-spin text-blue-500" />
                     <p className="text-blue-500 font-medium">Uploading...</p>
                   </div>
                 ) : value ? (
@@ -180,6 +185,6 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
       </div>
     </div>
   );
-}
+};
 
 export default ImageUpload;

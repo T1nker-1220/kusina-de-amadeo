@@ -1,7 +1,7 @@
-import { initializeApp, getApps } from 'firebase/app';
+import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
-import { getMessaging, getToken, onMessage } from 'firebase/messaging';
+import { getMessaging, getToken, onMessage, Messaging } from 'firebase/messaging';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -13,12 +13,19 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-const db = getFirestore(app);
-const storage = getStorage(app);
+let app: FirebaseApp;
+
+if (!getApps().length) {
+  app = initializeApp(firebaseConfig);
+} else {
+  app = getApps()[0];
+}
+
+export const db = getFirestore(app);
+export const storage = getStorage(app);
 
 // Messaging setup (only in browser)
-let messaging: any = null;
+let messaging: Messaging | null = null;
 if (typeof window !== 'undefined') {
   try {
     messaging = getMessaging(app);
@@ -49,14 +56,13 @@ export const getFCMToken = async () => {
 };
 
 // Function to handle incoming messages
-export const onMessageListener = () => {
-  if (!messaging) return Promise.reject('Messaging not initialized');
-  
-  return new Promise((resolve) => {
-    onMessage(messaging, (payload) => {
-      resolve(payload);
-    });
+export const onMessageListener = () =>
+  new Promise((resolve) => {
+    if (messaging) {
+      onMessage(messaging, (payload) => {
+        resolve(payload);
+      });
+    }
   });
-};
 
-export { app, db, storage, messaging };
+export { app, messaging };

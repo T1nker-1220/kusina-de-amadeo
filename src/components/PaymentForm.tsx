@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import ImageUpload from './ImageUpload';
-import { BiLoading } from 'react-icons/bi';
+import { BiLoaderAlt } from 'react-icons/bi';
 import { FiAlertCircle } from 'react-icons/fi';
+import { logger } from '@/utils/logger';
 
 interface PaymentFormProps {
   orderId: string;
@@ -52,9 +53,10 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
         paymentProofUrl,
         referenceNumber
       });
-    } catch (error) {
-      console.error('Error submitting payment:', error);
-      setError('Failed to submit payment. Please try again.');
+    } catch (err) {
+      const error = err as Error;
+      logger.error('Payment processing error:', error);
+      setError(error.message || 'An error occurred during payment processing');
     } finally {
       setIsSubmitting(false);
     }
@@ -164,10 +166,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
               `}
             >
               {isSubmitting ? (
-                <span className="flex items-center">
-                  <BiLoading className="animate-spin -ml-1 mr-2 h-4 w-4" />
-                  Processing...
-                </span>
+                <BiLoaderAlt className="h-5 w-5 animate-spin" />
               ) : (
                 'Submit Payment'
               )}

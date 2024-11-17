@@ -1,3 +1,4 @@
+import React, { Suspense } from 'react';
 import './globals.css';
 import { Poppins } from 'next/font/google';
 import { CartProvider } from '@/context/CartContext';
@@ -5,11 +6,14 @@ import Navbar from '@/components/Navbar';
 import LayoutTransition from '@/components/LayoutTransition';
 import MobileMenu from '@/components/MobileMenu';
 import Footer from '@/components/Footer';
-import { Suspense } from 'react';
 
 const poppins = Poppins({
   subsets: ['latin'],
-  weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
+  preload: true,
+  fallback: ['system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Arial', 'sans-serif'],
+  adjustFontFallback: true,
 });
 
 export const metadata = {

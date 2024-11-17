@@ -2,6 +2,7 @@
 import { useCart } from '@/context/CartContext';
 import { MinusIcon, PlusIcon, TrashIcon, ShoppingBagIcon, BookOpenIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function CartPage() {
@@ -96,9 +97,11 @@ export default function CartPage() {
                       className="w-24 h-24 rounded-xl overflow-hidden flex-shrink-0
                         ring-2 ring-theme-peach/20 ring-offset-2 ring-offset-theme-navy/30"
                     >
-                      <img
+                      <Image
                         src={item.image}
                         alt={item.name}
+                        width={96}
+                        height={96}
                         className="w-full h-full object-cover transform transition-transform
                           duration-300 group-hover:scale-110"
                       />

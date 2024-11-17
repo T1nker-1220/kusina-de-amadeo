@@ -1,5 +1,5 @@
 'use client';
-import { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import Toast, { ToastType } from '@/components/ui/Toast';
 import { AnimatePresence } from 'framer-motion';
 
@@ -37,4 +37,4 @@ export const useToast = () => {
   const context = useContext(ToastContext);
   if (!context) throw new Error('useToast must be used within ToastProvider');
   return context;
-}; 
+};

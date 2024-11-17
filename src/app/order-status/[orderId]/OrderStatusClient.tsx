@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/config/firebase';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -22,6 +22,11 @@ interface Order {
   paymentMethod: string;
   orderStatus: string;
   paymentStatus: string;
+  orderType: 'now' | 'preorder';
+  preorderDetails?: {
+    deliveryDate: string;
+    deliveryTime: string;
+  };
   orderDate: {
     seconds: number;
     nanoseconds: number;
@@ -108,14 +113,15 @@ export default function OrderStatusClient({ orderId }: { orderId: string }) {
   const orderDate = new Date(order.orderDate.seconds * 1000);
 
   const getStatusColor = (status: string) => {
-    const statusColors = {
+    const statusColors: Record<string, string> = {
       pending: 'bg-yellow-100 text-yellow-800 border-yellow-200',
       processing: 'bg-blue-100 text-blue-800 border-blue-200',
       completed: 'bg-green-100 text-green-800 border-green-200',
       paid: 'bg-green-100 text-green-800 border-green-200',
       cancelled: 'bg-red-100 text-red-800 border-red-200'
     };
-    return statusColors[status?.toLowerCase() ?? ''] || 'bg-gray-100 text-gray-800 border-gray-200';
+    const normalizedStatus = status?.toLowerCase() ?? '';
+    return statusColors[normalizedStatus] || 'bg-gray-100 text-gray-800 border-gray-200';
   };
 
   return (
@@ -199,6 +205,33 @@ export default function OrderStatusClient({ orderId }: { orderId: string }) {
                         <p className="font-medium text-gray-800">{orderDate.toLocaleString()}</p>
                       </div>
                     </div>
+                    <div className="flex items-center gap-3">
+                      <FiPackage className="text-gray-400" />
+                      <div>
+                        <p className="text-sm text-gray-500">Order Type</p>
+                        <p className="font-medium text-gray-800">
+                          {order.orderType === 'now' ? 'Order Now' : 'Pre-order'}
+                        </p>
+                      </div>
+                    </div>
+                    {order.orderType === 'preorder' && order.preorderDetails && (
+                      <div className="flex items-center gap-3">
+                        <FiCalendar className="text-gray-400" />
+                        <div>
+                          <p className="text-sm text-gray-500">Delivery Date</p>
+                          <p className="font-medium text-gray-800">{order.preorderDetails.deliveryDate}</p>
+                        </div>
+                      </div>
+                    )}
+                    {order.orderType === 'preorder' && order.preorderDetails && (
+                      <div className="flex items-center gap-3">
+                        <FiCalendar className="text-gray-400" />
+                        <div>
+                          <p className="text-sm text-gray-500">Delivery Time</p>
+                          <p className="font-medium text-gray-800">{order.preorderDetails.deliveryTime}</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </motion.div>
 

@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useCart } from '@/context/CartContext';
 import { motion } from 'framer-motion';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
@@ -31,12 +31,11 @@ export default function CheckoutForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = <T extends HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(
+    e: React.ChangeEvent<T>
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -88,9 +87,14 @@ export default function CheckoutForm() {
 
       // Clear the cart after successful order
       clearCart();
-    } catch (err: any) {
-      const errorMessage = err?.message || 'An error occurred while submitting your order.';
-      console.error('Error submitting order:', errorMessage);
+    } catch (err) {
+      const error = err as Error;
+      const errorMessage = error?.message || 'An error occurred while submitting your order.';
+      // Log error safely
+      if (process.env.NODE_ENV === 'development') {
+        // eslint-disable-next-line no-console
+        console.log('Error submitting order:', errorMessage);
+      }
       setError(errorMessage);
     } finally {
       setIsSubmitting(false);

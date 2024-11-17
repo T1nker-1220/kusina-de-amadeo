@@ -9,12 +9,21 @@ import { HiCheckCircle } from 'react-icons/hi';
 import { motion } from 'framer-motion';
 import { FaCheckCircle } from 'react-icons/fa';
 
+interface OrderItem {
+  name: string;
+  price: number;
+  quantity: number;
+}
+
 interface OrderDetails {
   id: string;
   total: number;
-  items: any[];
+  items: OrderItem[];
   customerName: string;
-  orderDate: any;
+  orderDate: {
+    seconds: number;
+    nanoseconds: number;
+  };
   status: string;
 }
 

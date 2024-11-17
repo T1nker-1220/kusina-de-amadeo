@@ -4,6 +4,7 @@ import { useCart } from '@/context/CartContext';
 import { Product } from '@/types';
 import { ShoppingCartIcon, PlusIcon, MinusIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 
 interface ProductCardProps {
   product: Product;
@@ -40,17 +41,14 @@ export default function ProductCard({ product }: ProductCardProps) {
         hover:shadow-2xl hover:shadow-theme-peach/20
         hover:border-theme-peach/30 transition-all duration-500"
     >
-      <div className="aspect-square relative overflow-hidden">
-        <img
+      <div className="relative w-full aspect-square overflow-hidden rounded-xl">
+        <Image
           src={product.image}
           alt={product.name}
-          className="w-full h-full object-cover brightness-100 contrast-100
-            transform scale-100 group-hover:scale-110 
-            transition-all duration-700"
+          fill
+          className="object-cover w-full h-full"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
-        <div className="absolute inset-0 bg-gradient-to-t 
-          from-theme-dark/80 via-transparent to-transparent 
-          opacity-50 group-hover:opacity-30 transition-opacity duration-300" />
       </div>
       
       <div className="p-6 space-y-4 relative">
