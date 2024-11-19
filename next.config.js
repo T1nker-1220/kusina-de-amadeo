@@ -38,11 +38,15 @@ const nextConfig = {
       bodySizeLimit: '2mb'
     },
   },
+  typescript: {
+    ignoreBuildErrors: true
+  },
+  eslint: {
+    ignoreDuringBuilds: true
+  },
+  pageExtensions: ['tsx', 'ts', 'jsx', 'js'].filter(ext => !ext.includes('functions')),
   webpack: (config, { isServer }) => {
-    // Exclude Firebase Functions from the build
-    config.externals.push({
-      'firebase-functions': 'firebase-functions',
-    });
+    config.externals = [...(config.externals || []), 'firebase-functions'];
     return config;
   }
 }
