@@ -1,21 +1,21 @@
-import { initializeApp, getApps, cert } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
-import { getMessaging } from 'firebase-admin/messaging';
+import * as admin from 'firebase-admin';
 
-const firebaseAdminConfig = {
-  credential: cert({
-    projectId: process.env.FIREBASE_ADMIN_PROJECT_ID,
-    clientEmail: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
-    privateKey: process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-  }),
+const serviceAccount = {
+  projectId: process.env.FIREBASE_ADMIN_PROJECT_ID,
+  clientEmail: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
+  privateKey: process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, '\n'),
 };
 
-// Initialize Firebase Admin
-const app = getApps().length === 0 ? initializeApp(firebaseAdminConfig) : getApps()[0];
-const adminDb = getFirestore(app);
-const adminMessaging = getMessaging(app);
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
+  });
+}
 
-export { app, adminDb, adminMessaging };
+const adminDb = admin.firestore();
+const adminMessaging = admin.messaging();
+
+export { adminDb, adminMessaging };
 
 // Helper function to send notifications
 export const sendNotification = async (

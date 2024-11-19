@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getAuth } from 'firebase/auth';
 import { app } from '@/config/firebase';
 import { getOrderById } from '@/services/orders';
 import { Button } from '@/components/ui/Button';
@@ -13,10 +12,20 @@ export default function OrderClient({ orderId }: { orderId: string }) {
   const [order, setOrder] = useState<OrderDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const auth = getAuth(app);
+  const [auth, setAuth] = useState<any>(null);
+
+  useEffect(() => {
+    const initAuth = async () => {
+      const { getAuth } = await import('firebase/auth');
+      setAuth(getAuth(app));
+    };
+    initAuth();
+  }, []);
 
   useEffect(() => {
     async function fetchOrder() {
+      if (!auth) return;
+
       try {
         const user = auth.currentUser;
         if (!user) {
