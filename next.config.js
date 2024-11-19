@@ -34,7 +34,12 @@ const nextConfig = {
   },
   experimental: {
     serverActions: {
-      allowedOrigins: ['localhost:3000', 'kusina-de-amadeo.vercel.app'],
+      allowedOrigins: [
+        'localhost:3000',
+        'kusina-de-amadeo.vercel.app',
+        'kusina-de-amadeo-rjjmzh210-t1nker-1220s-projects.vercel.app',
+        '.vercel.app'
+      ],
       bodySizeLimit: '2mb'
     },
   },
