@@ -11,6 +11,7 @@ import {
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { AuthContextType, AuthProviderProps, AuthState, UserProfile } from '@/types/auth';
+import { createLoyaltyProfile } from '@/services/loyalty';
 
 const initialState: AuthState = {
   user: null,
@@ -56,6 +57,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         },
         { merge: true }
       );
+
+      // Create loyalty profile for new user
+      await createLoyaltyProfile(user.uid);
     } catch (error) {
       console.error('Error creating user profile:', error);
       throw error;

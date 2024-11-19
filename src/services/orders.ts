@@ -8,7 +8,11 @@ import {
   getDoc,
 } from 'firebase/firestore';
 import { db } from '@/config/firebase';
-import { sendOrderUpdateNotification } from './notifications';
+import { 
+  sendOrderConfirmation,
+  sendOrderStatusUpdate,
+  sendDeliveryUpdate
+} from './notifications';
 import { addPointsFromPurchase } from './loyalty';
 import { CartItem } from '@/types/cart';
 
@@ -28,6 +32,7 @@ export interface OrderDetails {
   contactInfo: {
     email: string;
     phone: string;
+    name: string;
   };
   specialInstructions?: string;
   orderType: 'now' | 'preorder';
@@ -38,8 +43,35 @@ export interface OrderDetails {
 export async function createOrder(orderDetails: OrderDetails): Promise<string> {
   try {
     // Start a transaction to ensure all operations are atomic
-    return await runTransaction(db, async (transaction) => {
-      // 1. Create the order document
+    const orderId = await runTransaction(db, async (transaction) => {
+      // First, perform all reads
+      const productReads = await Promise.all(
+        orderDetails.items.map(async (item) => {
+          const productRef = doc(db, 'products', item.id);
+          const productDoc = await transaction.get(productRef);
+          
+          if (!productDoc.exists()) {
+            throw new Error(`Product ${item.id} not found`);
+          }
+
+          const currentInventory = productDoc.data().inventory;
+          if (currentInventory < item.quantity) {
+            throw new Error(`Insufficient inventory for product ${item.id}`);
+          }
+
+          return {
+            ref: productRef,
+            currentInventory,
+            requestedQuantity: item.quantity
+          };
+        })
+      );
+
+      // Read cart document
+      const cartRef = doc(db, 'carts', orderDetails.userId);
+      await transaction.get(cartRef);
+
+      // Now perform all writes
       const orderRef = doc(collection(db, 'orders'));
       const order = {
         ...orderDetails,
@@ -48,45 +80,51 @@ export async function createOrder(orderDetails: OrderDetails): Promise<string> {
         orderNumber: generateOrderNumber(),
       };
 
+      // 1. Create order
       transaction.set(orderRef, order);
 
       // 2. Update product inventory
-      for (const item of orderDetails.items) {
-        const productRef = doc(db, 'products', item.id);
-        transaction.update(productRef, {
-          inventory: item.quantity,
+      for (const product of productReads) {
+        transaction.update(product.ref, {
+          inventory: product.currentInventory - product.requestedQuantity,
         });
       }
 
       // 3. Clear user's cart
-      const cartRef = doc(db, 'carts', orderDetails.userId);
       transaction.update(cartRef, {
         items: [],
         updatedAt: serverTimestamp(),
       });
 
-      // 4. Add loyalty points
-      await addPointsFromPurchase(orderDetails.userId, orderDetails.totalAmount);
-
-      // 5. Send order confirmation email
-      await sendOrderUpdateNotification(
-        orderDetails.contactInfo.email,
-        orderRef.id,
-        {
-          orderId: orderRef.id,
-          status: 'pending',
-          customerName: orderDetails.contactInfo.email,
-          estimatedDeliveryTime: calculateEstimatedDeliveryTime(),
-          items: orderDetails.items.map(item => ({
-            name: item.name,
-            quantity: item.quantity
-          })),
-          total: orderDetails.totalAmount
-        }
-      );
-
       return orderRef.id;
     });
+
+    // After transaction succeeds, perform non-critical operations
+    try {
+      // 4. Add loyalty points (non-critical)
+      await addPointsFromPurchase(orderDetails.userId, orderDetails.totalAmount);
+    } catch (error) {
+      console.error('Error adding loyalty points:', error);
+    }
+
+    try {
+      // 5. Send order confirmation notification
+      await sendOrderConfirmation(
+        orderDetails.contactInfo.email,
+        orderDetails.contactInfo.phone,
+        orderId,
+        orderDetails.contactInfo.name,
+        orderDetails.items.map(item => ({
+          name: item.name,
+          quantity: item.quantity
+        })),
+        orderDetails.totalAmount
+      );
+    } catch (error) {
+      console.error('Error sending order notifications:', error);
+    }
+
+    return orderId;
   } catch (error) {
     console.error('Error creating order:', error);
     throw error;
@@ -109,20 +147,16 @@ export async function updateOrderStatus(
     // Send notification about status update
     const order = await getOrderById(orderId);
     if (order) {
-      await sendOrderUpdateNotification(
+      await sendOrderStatusUpdate(
         order.contactInfo.email,
         orderId,
-        {
-          orderId,
-          status,
-          customerName: order.contactInfo.email,
-          estimatedDeliveryTime: calculateEstimatedDeliveryTime(),
-          items: order.items.map(item => ({
-            name: item.name,
-            quantity: item.quantity
-          })),
-          total: order.totalAmount
-        }
+        status,
+        order.contactInfo.name,
+        order.items.map(item => ({
+          name: item.name,
+          quantity: item.quantity
+        })),
+        order.totalAmount
       );
     }
   } catch (error) {

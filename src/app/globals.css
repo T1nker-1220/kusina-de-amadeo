@@ -49,6 +49,23 @@ body {
   }
 }
 
+@layer components {
+  .fancy-button {
+    @apply relative overflow-hidden rounded-xl
+      bg-gradient-to-br from-[#A34054] via-[#C84242] to-[#A34054]
+      hover:from-[#C84242] hover:via-[#A34054] hover:to-[#C84242]
+      text-white font-medium shadow-lg
+      border border-white/10 backdrop-blur-sm
+      transition-all duration-500
+      before:absolute before:inset-0
+      before:bg-gradient-to-r before:from-transparent
+      before:via-white/10 before:to-transparent
+      before:-translate-x-full hover:before:translate-x-full
+      before:transition-transform before:duration-700
+      active:scale-[0.98];
+  }
+}
+
 @layer utilities {
   .glass-panel {
     @apply bg-white/5 backdrop-blur-md
@@ -120,21 +137,6 @@ body {
     @apply transition-all duration-700 ease-out;
     backface-visibility: hidden;
     transform: translateZ(0);
-  }
-
-  .fancy-button {
-    @apply relative overflow-hidden rounded-xl
-      bg-gradient-to-br from-theme-wine via-theme-red to-theme-wine
-      hover:from-theme-red hover:via-theme-wine hover:to-theme-red
-      text-white font-medium shadow-lg
-      border border-white/10 backdrop-blur-sm
-      transition-all duration-500
-      before:absolute before:inset-0
-      before:bg-gradient-to-r before:from-transparent
-      before:via-white/10 before:to-transparent
-      before:-translate-x-full hover:before:translate-x-full
-      before:transition-transform before:duration-700
-      active:scale-[0.98];
   }
 
   .hover-gradient {

@@ -59,8 +59,8 @@ export default withAuth(function CheckoutPage() {
         orderStatus: 'pending' as const,
         specialInstructions: formData.notes,
         orderType: formData.orderType,
-        deliveryDate: formData.deliveryDate,
-        deliveryTime: formData.deliveryTime,
+        deliveryDate: formData.orderType === 'preorder' ? formData.deliveryDate : null,
+        deliveryTime: formData.orderType === 'preorder' ? formData.deliveryTime : null,
       };
 
       const orderId = await createOrder(order);
@@ -72,7 +72,7 @@ export default withAuth(function CheckoutPage() {
       logger.error('Checkout error:', error);
       setOrderStatus({
         loading: false,
-        error: 'Failed to create order. Please try again.',
+        error: error instanceof Error ? error.message : 'Failed to create order. Please try again.',
         success: false,
       });
     }

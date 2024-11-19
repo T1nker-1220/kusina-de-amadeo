@@ -13,6 +13,7 @@ import {
   UserCircleIcon,
 } from '@heroicons/react/24/outline';
 import { FaFacebook } from 'react-icons/fa';
+import NotificationBell from './NotificationBell'; // Assuming NotificationBell is in the same directory
 
 export default function Navbar() {
   const { items } = useCart();
@@ -94,6 +95,9 @@ export default function Navbar() {
                 )}
               </motion.button>
             </Link>
+
+            {/* Notification Bell */}
+            <NotificationBell />
 
             {/* Cart Button */}
             <Link href="/cart">

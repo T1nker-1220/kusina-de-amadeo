@@ -31,7 +31,9 @@ export default function CheckoutForm({ onSubmit, loading }: CheckoutFormProps) {
     address: '',
     notes: '',
     paymentMethod: 'cod',
-    orderType: 'now'
+    orderType: 'now',
+    deliveryDate: new Date().toISOString().split('T')[0],
+    deliveryTime: ''
   });
   const [error, setError] = useState<string | null>(null);
 
@@ -48,6 +50,24 @@ export default function CheckoutForm({ onSubmit, loading }: CheckoutFormProps) {
     // Validate cart is not empty
     if (items.length === 0) {
       setError('Your cart is empty. Please add items before checking out.');
+      return;
+    }
+
+    // Validate delivery fields for pre-orders
+    if (formData.orderType === 'preorder') {
+      if (!formData.deliveryDate) {
+        setError('Please select a delivery date');
+        return;
+      }
+      if (!formData.deliveryTime) {
+        setError('Please select a delivery time');
+        return;
+      }
+    }
+
+    // Validate required fields
+    if (!formData.phone || !formData.address) {
+      setError('Please fill in all required fields');
       return;
     }
 

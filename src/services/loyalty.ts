@@ -6,6 +6,7 @@ import {
   Transaction,
   runTransaction,
   FieldValue,
+  setDoc,
 } from 'firebase/firestore';
 import { db } from '@/config/firebase';
 
@@ -51,7 +52,19 @@ export async function addPointsFromPurchase(
     const profile = await transaction.get(profileRef);
 
     if (!profile.exists()) {
-      throw new Error('Loyalty profile not found');
+      // Create new profile if it doesn't exist
+      const newProfile: LoyaltyProfile = {
+        userId,
+        points: pointsToAdd,
+        tier: await calculateTier(pointsToAdd),
+        totalSpent: amount,
+        joinDate: new Date().toISOString(),
+        lastActivity: new Date().toISOString(),
+        rewards: [],
+      };
+
+      transaction.set(profileRef, newProfile);
+      return newProfile;
     }
 
     const currentData = profile.data() as LoyaltyProfile;
@@ -112,4 +125,26 @@ export async function redeemReward(
     transaction.update(profileRef, updates);
     return true;
   });
+}
+
+export async function createLoyaltyProfile(userId: string): Promise<LoyaltyProfile> {
+  const profileRef = doc(db, 'loyaltyProfiles', userId);
+  const profile = await getDoc(profileRef);
+
+  if (profile.exists()) {
+    return profile.data() as LoyaltyProfile;
+  }
+
+  const newProfile: LoyaltyProfile = {
+    userId,
+    points: 0,
+    tier: 'bronze',
+    totalSpent: 0,
+    joinDate: new Date().toISOString(),
+    lastActivity: new Date().toISOString(),
+    rewards: [],
+  };
+
+  await setDoc(profileRef, newProfile);
+  return newProfile;
 }
