@@ -65,6 +65,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const signInWithGoogle = async () => {
     try {
       const provider = new GoogleAuthProvider();
+      // Add additional scopes
+      provider.addScope('https://www.googleapis.com/auth/userinfo.profile');
+      provider.addScope('https://www.googleapis.com/auth/userinfo.email');
+      
+      // Set custom parameters
+      provider.setCustomParameters({
+        prompt: 'select_account'
+      });
+
       const result = await signInWithPopup(auth, provider);
       const userProfile: UserProfile = {
         uid: result.user.uid,
@@ -79,9 +88,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
       };
       await createUserProfile(userProfile);
       setState((prev) => ({ ...prev, error: null }));
-    } catch (error) {
+    } catch (error: any) {
       console.error('Google sign in error:', error);
-      setState((prev) => ({ ...prev, error: error as Error }));
+      // More specific error handling
+      if (error.code === 'auth/popup-closed-by-user') {
+        setState((prev) => ({ 
+          ...prev, 
+          error: new Error('Sign-in popup was closed. Please try again.') 
+        }));
+      } else if (error.code === 'auth/popup-blocked') {
+        setState((prev) => ({ 
+          ...prev, 
+          error: new Error('Sign-in popup was blocked. Please allow popups for this site.') 
+        }));
+      } else {
+        setState((prev) => ({ ...prev, error: error as Error }));
+      }
     }
   };
 
