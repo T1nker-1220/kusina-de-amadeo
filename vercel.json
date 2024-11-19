@@ -1,0 +1,25 @@
+{
+  "version": 2,
+  "buildCommand": "npm run build",
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD ./functions/",
+  "outputDirectory": ".next",
+  "functions": {
+    "api/**/*": {
+      "runtime": "nodejs18.x"
+    }
+  },
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/" }
+  ],
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/next"
+    }
+  ],
+  "excludeFiles": [
+    "functions/**",
+    "firebase.json",
+    ".firebaserc"
+  ]
+}

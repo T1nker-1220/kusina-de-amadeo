@@ -32,6 +32,13 @@ const nextConfig = {
       bodySizeLimit: '2mb'
     },
   },
+  webpack: (config, { isServer }) => {
+    // Exclude Firebase Functions from the build
+    config.externals.push({
+      'firebase-functions': 'firebase-functions',
+    });
+    return config;
+  }
 }
 
 module.exports = nextConfig
