@@ -51,8 +51,7 @@ export default function Navbar() {
                 width={40}
                 height={40}
                 priority
-                className="rounded-full shadow-lg shadow-orange-500/20
-                  group-hover:shadow-orange-500/30 transition-all duration-300"
+                className="object-contain"
               />
             </motion.div>
             <motion.span 

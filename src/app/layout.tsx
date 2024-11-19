@@ -29,16 +29,18 @@ export default function RootLayout({
       <body className="bg-theme-dark text-white min-h-screen">
         <AuthProvider>
           <CartProvider>
-            <Navbar />
-            <MobileMenu />
-            <Suspense fallback={<div>Loading...</div>}>
-              <main className="pt-16 md:pt-20">
-                <LayoutTransition>
-                  {children}
-                </LayoutTransition>
+            <div className="flex flex-col min-h-screen">
+              <Navbar />
+              <MobileMenu />
+              <main className="flex-grow pt-16 md:pt-20">
+                <Suspense fallback={<div>Loading...</div>}>
+                  <LayoutTransition>
+                    {children}
+                  </LayoutTransition>
+                </Suspense>
               </main>
-            </Suspense>
-            <Footer />
+              <Footer />
+            </div>
           </CartProvider>
         </AuthProvider>
       </body>
