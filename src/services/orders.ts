@@ -5,6 +5,7 @@ import {
   updateDoc,
   serverTimestamp,
   runTransaction,
+  getDoc,
 } from 'firebase/firestore';
 import { db } from '@/config/firebase';
 import { sendOrderUpdateNotification } from './notifications';
@@ -29,6 +30,9 @@ export interface OrderDetails {
     phone: string;
   };
   specialInstructions?: string;
+  orderType: 'now' | 'preorder';
+  deliveryDate?: string;
+  deliveryTime?: string;
 }
 
 export async function createOrder(orderDetails: OrderDetails): Promise<string> {
@@ -68,8 +72,17 @@ export async function createOrder(orderDetails: OrderDetails): Promise<string> {
       await sendOrderUpdateNotification(
         orderDetails.contactInfo.email,
         orderRef.id,
-        'pending',
-        calculateEstimatedDeliveryTime()
+        {
+          orderId: orderRef.id,
+          status: 'pending',
+          customerName: orderDetails.contactInfo.email,
+          estimatedDeliveryTime: calculateEstimatedDeliveryTime(),
+          items: orderDetails.items.map(item => ({
+            name: item.name,
+            quantity: item.quantity
+          })),
+          total: orderDetails.totalAmount
+        }
       );
 
       return orderRef.id;
@@ -99,8 +112,17 @@ export async function updateOrderStatus(
       await sendOrderUpdateNotification(
         order.contactInfo.email,
         orderId,
-        status,
-        calculateEstimatedDeliveryTime()
+        {
+          orderId,
+          status,
+          customerName: order.contactInfo.email,
+          estimatedDeliveryTime: calculateEstimatedDeliveryTime(),
+          items: order.items.map(item => ({
+            name: item.name,
+            quantity: item.quantity
+          })),
+          total: order.totalAmount
+        }
       );
     }
   } catch (error) {
@@ -112,12 +134,11 @@ export async function updateOrderStatus(
 export async function getOrderById(orderId: string): Promise<OrderDetails | null> {
   try {
     const orderRef = doc(db, 'orders', orderId);
-    const orderDoc = await orderRef.get();
-
-    if (orderDoc.exists()) {
-      return orderDoc.data() as OrderDetails;
+    const orderDoc = await getDoc(orderRef);
+    if (!orderDoc.exists()) {
+      return null;
     }
-    return null;
+    return orderDoc.data() as OrderDetails;
   } catch (error) {
     console.error('Error getting order:', error);
     throw error;
@@ -125,14 +146,13 @@ export async function getOrderById(orderId: string): Promise<OrderDetails | null
 }
 
 function generateOrderNumber(): string {
-  const timestamp = Date.now();
-  const random = Math.floor(Math.random() * 1000);
+  const timestamp = Date.now().toString();
+  const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
   return `KDA-${timestamp}-${random}`;
 }
 
 function calculateEstimatedDeliveryTime(): string {
   const now = new Date();
-  // Add 45 minutes for preparation and delivery
-  const estimatedTime = new Date(now.getTime() + 45 * 60000);
+  const estimatedTime = new Date(now.getTime() + 45 * 60000); // 45 minutes from now
   return estimatedTime.toISOString();
 }

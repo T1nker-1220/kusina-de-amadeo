@@ -37,7 +37,7 @@ export async function shareToSocial(
   contentType: SocialShare['contentType'],
   contentId: string,
   userId: string
-): Promise<void> {
+): Promise<string> {
   // Get content data based on type
   const contentRef = doc(db, contentType + 's', contentId);
   const contentDoc = await getDoc(contentRef);

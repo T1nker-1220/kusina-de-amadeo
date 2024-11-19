@@ -5,6 +5,7 @@ import {
   increment,
   Transaction,
   runTransaction,
+  FieldValue,
 } from 'firebase/firestore';
 import { db } from '@/config/firebase';
 
@@ -12,7 +13,7 @@ export interface LoyaltyProfile {
   userId: string;
   points: number;
   tier: 'bronze' | 'silver' | 'gold' | 'platinum';
-  totalSpent: number;
+  totalSpent: number | FieldValue;
   joinDate: string;
   lastActivity: string;
   rewards: {
@@ -100,9 +101,10 @@ export async function redeemReward(
         ...currentData.rewards,
         {
           id: rewardId,
+          name: 'Free Delivery',
           cost: pointsCost,
+          expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
           used: false,
-          expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
         },
       ],
     };

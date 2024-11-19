@@ -40,9 +40,9 @@ export function clearCache(key?: string) {
 
 export function invalidateCache() {
   const now = Date.now();
-  for (const [key, value] of cache.entries()) {
+  Array.from(cache.entries()).forEach(([key, value]) => {
     if (now - value.timestamp >= CACHE_DURATION) {
       cache.delete(key);
     }
-  }
+  });
 }

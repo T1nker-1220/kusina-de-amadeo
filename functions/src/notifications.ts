@@ -1,4 +1,4 @@
-import {onCall} from "firebase-functions/v2/https";
+import * as functions from "firebase-functions";
 import * as nodemailer from "nodemailer";
 import {defineString} from "firebase-functions/params";
 
@@ -49,76 +49,53 @@ const emailTemplates: Record<
       <p>Your order #${data.orderId} has been received.</p>
       <h3>Order Details:</h3>
       <ul>
-      ${data.items
-        ?.map((item) => 
-          `<li>${item.quantity}x ${item.name}</li>`
-        )
-        .join("")}
+        ${data.items?.map((item) => `
+          <li>${item.name} x ${item.quantity} - $${item.price.toFixed(2)}</li>
+        `).join("")}
       </ul>
-      <p><strong>Total:</strong> ₱${data.total?.toFixed(2)}</p>
-      <p>We'll notify you when your order is ready for delivery.</p>
+      <p><strong>Total:</strong> $${data.total?.toFixed(2)}</p>
+      <p>We'll notify you when your order is ready.</p>
     `,
   }),
   "order-update": (data: EmailTemplateData) => ({
     subject: `Order Update: #${data.orderId}`,
     html: `
       <h2>Order Status Update</h2>
-      <p>${data.statusMessage}</p>
+      <p>Dear ${data.customerName},</p>
+      <p>Your order #${data.orderId} has been updated:</p>
+      <p><strong>${data.statusMessage}</strong></p>
+      <p>Thank you for choosing Kusina De Amadeo!</p>
     `,
   }),
 };
 
-export const sendEmail = onCall<SendEmailData>(async (request) => {
+// Cloud Function to send emails
+export const sendEmail = functions.https.onCall(async (request) => {
   try {
-    const {data} = request;
-    const {to, template, data: templateData} = data;
-
-    if (!to || !template || !templateData) {
-      throw new Error("Missing required email parameters");
+    const data = request.data as SendEmailData;
+    
+    if (!data || !data.to || !data.template || !data.data) {
+      throw new functions.https.HttpsError(
+        "invalid-argument",
+        "Missing required email parameters"
+      );
     }
 
-    const emailTemplate = emailTemplates[template];
-    if (!emailTemplate) {
-      throw new Error(`Email template "${template}" not found`);
-    }
+    const template = emailTemplates[data.template](data.data);
 
-    const {subject, html} = emailTemplate(templateData);
-
-    const mailOptions = {
-      from: `Kusina De Amadeo <${smtpUser.value()}>`,
-      to,
-      subject,
-      html,
-    };
-
-    await transporter.sendMail(mailOptions);
-
-    return {success: true};
-  } catch (error) {
-    console.error("Error sending email:", error);
-    throw new Error("Error sending email notification");
-  }
-});
-
-// Test function to verify email setup
-export const testEmail = onCall(async () => {
-  try {
     await transporter.sendMail({
-      from: `Kusina De Amadeo <${smtpUser.value()}>`,
-      to: smtpUser.value(),
-      subject: "Test Email from Kusina De Amadeo",
-      html: `
-        <h2>Test Email</h2>
-        <p>If you're seeing this, your email configuration is working!</p>
-        <p>Time sent: ${new Date().toLocaleString()}</p>
-      `,
+      from: '"Kusina De Amadeo" <noreply@kusinaDeAmadeo.com>',
+      to: data.to,
+      subject: template.subject,
+      html: template.html,
     });
 
-    return {success: true, message: "Test email sent!"};
+    return { success: true };
   } catch (error) {
-    console.error("Error sending test email:", error);
-    throw new Error(
-      error instanceof Error ? error.message : "Failed to send test email"
+    console.error("Error sending email:", error);
+    throw new functions.https.HttpsError(
+      "internal",
+      "Failed to send email"
     );
   }
 });

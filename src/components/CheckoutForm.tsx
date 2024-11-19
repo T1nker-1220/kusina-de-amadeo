@@ -17,7 +17,12 @@ interface FormData {
   deliveryTime?: string;
 }
 
-export default function CheckoutForm() {
+interface CheckoutFormProps {
+  onSubmit: (formData: FormData) => Promise<void>;
+  loading: boolean;
+}
+
+export default function CheckoutForm({ onSubmit, loading }: CheckoutFormProps) {
   const { items, getTotal, clearCart } = useCart();
   const router = useRouter();
   const [formData, setFormData] = useState<FormData>({
@@ -28,7 +33,6 @@ export default function CheckoutForm() {
     paymentMethod: 'cod',
     orderType: 'now'
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleInputChange = <T extends HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(
@@ -47,57 +51,12 @@ export default function CheckoutForm() {
       return;
     }
 
-    setIsSubmitting(true);
     setError(null);
-
+    
     try {
-      // Create order document
-      const orderRef = await addDoc(collection(db, 'orders'), {
-        customerName: formData.name,
-        phone: formData.phone,
-        address: formData.address,
-        notes: formData.notes,
-        paymentMethod: formData.paymentMethod,
-        orderType: formData.orderType,
-        ...(formData.orderType === 'preorder' && {
-          preorderDetails: {
-            deliveryDate: formData.deliveryDate,
-            deliveryTime: formData.deliveryTime
-          }
-        }),
-        items: items.map(item => ({
-          id: item.id,
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity
-        })),
-        total: getTotal(),
-        orderStatus: 'pending',
-        paymentStatus: formData.paymentMethod === 'cod' ? 'pending' : 'awaiting_proof',
-        orderDate: serverTimestamp()
-      });
-
-      // If payment method is GCash, redirect to payment page
-      if (formData.paymentMethod === 'gcash') {
-        router.push(`/checkout/payment?orderId=${orderRef.id}`);
-      } else {
-        // For COD, redirect to success page
-        router.push(`/payment/success?orderId=${orderRef.id}`);
-      }
-
-      // Clear the cart after successful order
-      clearCart();
+      await onSubmit(formData);
     } catch (err) {
-      const error = err as Error;
-      const errorMessage = error?.message || 'An error occurred while submitting your order.';
-      // Log error safely
-      if (process.env.NODE_ENV === 'development') {
-        // eslint-disable-next-line no-console
-        console.log('Error submitting order:', errorMessage);
-      }
-      setError(errorMessage);
-    } finally {
-      setIsSubmitting(false);
+      setError(err instanceof Error ? err.message : 'An error occurred while processing your order.');
     }
   };
 
@@ -322,16 +281,16 @@ export default function CheckoutForm() {
         {/* Submit Button */}
         <motion.button
           type="submit"
-          disabled={isSubmitting}
+          disabled={loading}
           whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.99 }}
           className={`w-full py-3 rounded-lg font-semibold
-            ${isSubmitting
+            ${loading
               ? 'bg-orange-500/50 cursor-not-allowed'
               : 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700'
             } transition-all duration-300`}
         >
-          {isSubmitting ? 'Processing...' : 'Place Order'}
+          {loading ? 'Processing...' : 'Place Order'}
         </motion.button>
       </form>
     </motion.div>

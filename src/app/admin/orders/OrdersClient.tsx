@@ -1,45 +1,57 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { collection, query, orderBy, onSnapshot, where } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, Timestamp } from 'firebase/firestore';
 import { db } from '@/config/firebase';
 import { logger } from '@/utils/logger';
 import { OrderDetails } from '@/services/orders';
 import { motion, AnimatePresence } from 'framer-motion';
 
+interface OrderWithMetadata extends OrderDetails {
+  id: string;
+  orderNumber: string;
+  createdAt: Timestamp;
+}
+
 const OrdersClient = () => {
-  const [orders, setOrders] = useState<OrderDetails[]>([]);
+  const [orders, setOrders] = useState<OrderWithMetadata[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('all');
 
   useEffect(() => {
-    try {
-      const ordersQuery = query(
-        collection(db, 'orders'),
-        orderBy('createdAt', 'desc')
-      );
+    const fetchOrders = () => {
+      try {
+        const ordersQuery = query(
+          collection(db, 'orders'),
+          orderBy('createdAt', 'desc')
+        );
 
-      const unsubscribe = onSnapshot(ordersQuery, (snapshot) => {
-        const ordersData = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data()
-        })) as OrderDetails[];
+        const unsubscribe = onSnapshot(ordersQuery, (snapshot) => {
+          const ordersData = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data()
+          })) as OrderWithMetadata[];
 
-        setOrders(ordersData);
+          setOrders(ordersData);
+          setLoading(false);
+        }, (error) => {
+          logger.error('Error fetching orders:', error);
+          setError('Failed to load orders. Please try again.');
+          setLoading(false);
+        });
+
+        return unsubscribe;
+      } catch (error) {
+        logger.error('Error setting up orders listener:', error);
+        setError('Failed to initialize orders tracking.');
         setLoading(false);
-      }, (error) => {
-        logger.error('Error fetching orders:', error);
-        setError('Failed to load orders. Please try again.');
-        setLoading(false);
-      });
+        return () => {};
+      }
+    };
 
-      return () => unsubscribe();
-    } catch (error) {
-      logger.error('Error setting up orders listener:', error);
-      setError('Failed to initialize orders tracking.');
-      setLoading(false);
-    }
+    const unsubscribe = fetchOrders();
+    return () => unsubscribe();
   }, []);
 
   const filteredOrders = orders.filter(order => {
@@ -108,7 +120,7 @@ const OrdersClient = () => {
                     Order #{order.orderNumber}
                   </h3>
                   <p className="text-gray-600">
-                    {new Date(order.createdAt?.seconds * 1000).toLocaleString()}
+                    {order.createdAt?.toDate().toLocaleString()}
                   </p>
                 </div>
                 <div className={`

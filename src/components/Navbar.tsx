@@ -3,17 +3,20 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useCart } from '@/hooks/useCart';
+import { useAuth } from '@/context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ShoppingCartIcon, 
   HomeIcon, 
   BookOpenIcon,
   InformationCircleIcon,
+  UserCircleIcon,
 } from '@heroicons/react/24/outline';
 import { FaFacebook } from 'react-icons/fa';
 
 export default function Navbar() {
   const { items } = useCart();
+  const { user, loading: authLoading } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -68,6 +71,31 @@ export default function Navbar() {
 
           {/* Actions Section */}
           <div className="flex items-center gap-4">
+            {/* Login/Profile Button */}
+            <Link href={user ? "/profile" : "/login"}>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="relative p-2 rounded-xl bg-gradient-to-r from-orange-500/10 to-orange-600/10
+                  hover:from-orange-500/20 hover:to-orange-600/20
+                  border border-orange-500/20 hover:border-orange-500/30
+                  transition-all duration-300 group"
+              >
+                {user && user.photoURL ? (
+                  <Image
+                    src={user.photoURL}
+                    alt={user.displayName || "Profile"}
+                    width={24}
+                    height={24}
+                    className="rounded-full"
+                  />
+                ) : (
+                  <UserCircleIcon className="w-6 h-6 text-orange-400 
+                    group-hover:text-orange-500 transition-colors" />
+                )}
+              </motion.button>
+            </Link>
+
             {/* Cart Button */}
             <Link href="/cart">
               <motion.button
@@ -104,15 +132,13 @@ export default function Navbar() {
 
 function NavLink({ href, children, icon }: { href: string; children: React.ReactNode; icon: React.ReactNode }) {
   return (
-    <Link href={href}>
-      <motion.span
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        className="hover-gradient glass-panel px-4 py-2 flex items-center gap-2"
-      >
+    <Link href={href} className="group flex items-center gap-2">
+      <span className="text-orange-400 group-hover:text-orange-500 transition-colors">
         {icon}
-        <span className="font-medium">{children}</span>
-      </motion.span>
+      </span>
+      <span className="text-theme-slate group-hover:text-white transition-colors">
+        {children}
+      </span>
     </Link>
   );
 }

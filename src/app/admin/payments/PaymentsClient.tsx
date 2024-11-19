@@ -34,7 +34,7 @@ const PaymentsClient = () => {
       // Apply date filters
       if (dateFilter !== 'all') {
         const now = new Date();
-        let startDate = new Date();
+        const startDate = new Date();
 
         switch (dateFilter) {
           case 'today':
