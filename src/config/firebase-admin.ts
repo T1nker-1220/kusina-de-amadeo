@@ -2,7 +2,6 @@ import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getAuth } from 'firebase-admin/auth';
 import { getMessaging } from 'firebase-admin/messaging';
-import * as path from 'path';
 
 // Initialize Firebase Admin
 function initializeFirebaseAdmin() {
@@ -14,24 +13,20 @@ function initializeFirebaseAdmin() {
       return getApps()[0];
     }
 
-    // Get the service account path
-    const serviceAccountPath = path.join(process.cwd(), 'src', 'config', 'service-account.json');
-    console.log('Loading service account from:', serviceAccountPath);
+    // Initialize with environment variables
+    const app = initializeApp({
+      credential: cert({
+        projectId: process.env.FIREBASE_ADMIN_PROJECT_ID,
+        privateKeyId: process.env.FIREBASE_ADMIN_PRIVATE_KEY_ID,
+        privateKey: process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+        clientEmail: `firebase-adminsdk-gjssy@${process.env.FIREBASE_ADMIN_PROJECT_ID}.iam.gserviceaccount.com`,
+      }),
+    });
 
-    try {
-      // Initialize the app with the service account
-      const app = initializeApp({
-        credential: cert(serviceAccountPath),
-      });
-      
-      console.log('Firebase Admin initialized successfully');
-      return app;
-    } catch (error) {
-      console.error('Error initializing Firebase Admin:', error);
-      throw new Error(`Failed to initialize Firebase Admin: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
+    console.log('Firebase Admin initialized successfully');
+    return app;
   } catch (error) {
-    console.error('Error in initializeFirebaseAdmin:', error);
+    console.error('Error initializing Firebase Admin:', error);
     throw error;
   }
 }
