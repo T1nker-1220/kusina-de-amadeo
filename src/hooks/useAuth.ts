@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { onAuthStateChanged, User } from 'firebase/auth';
-import { auth } from '@/config/firebase';
+import { onAuthStateChanged, User, signOut as firebaseSignOut } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 import { logger } from '@/utils/logger';
 
 interface AuthState {
@@ -50,5 +50,14 @@ export function useAuth() {
     }
   }, []);
 
-  return authState;
+  const signOut = async () => {
+    try {
+      await firebaseSignOut(auth);
+    } catch (error) {
+      logger.error('Sign out error:', error);
+      throw error;
+    }
+  };
+
+  return { ...authState, signOut };
 }

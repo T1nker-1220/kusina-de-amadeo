@@ -2,317 +2,355 @@
 import React, { useState } from 'react';
 import { useCart } from '@/hooks/useCart';
 import { motion } from 'framer-motion';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
-import { db } from '@/config/firebase';
-import { useRouter } from 'next/navigation';
+import { CalendarIcon, ClockIcon, UserIcon, PhoneIcon, MapPinIcon, PencilIcon } from '@heroicons/react/24/outline';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 
-interface FormData {
-  name: string;
-  phone: string;
-  address: string;
-  notes: string;
-  paymentMethod: 'cod' | 'gcash';
-  orderType: 'now' | 'preorder';
-  deliveryDate?: string;
-  deliveryTime?: string;
+const schema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  phone: z.string().regex(/^(09|\+639)\d{9}$/, 'Please enter a valid Philippine mobile number'),
+  address: z.string().min(10, 'Please enter a complete delivery address'),
+  notes: z.string().optional(),
+  paymentMethod: z.enum(['cod', 'gcash']),
+  orderType: z.enum(['now', 'preorder']),
+  deliveryDate: z.string().optional(),
+  deliveryTime: z.string().optional(),
+}).refine((data) => {
+  if (data.orderType === 'preorder') {
+    return !!data.deliveryDate && !!data.deliveryTime;
+  }
+  return true;
+}, {
+  message: "Delivery date and time are required for pre-orders",
+  path: ["deliveryDate"],
+});
+
+type FormData = z.infer<typeof schema>;
+
+interface Props {
+  onSubmit: (data: FormData) => void;
+  loading?: boolean;
 }
 
-interface CheckoutFormProps {
-  onSubmit: (formData: FormData) => Promise<void>;
-  loading: boolean;
-}
+const formAnimation = {
+  hidden: { opacity: 0, y: 20 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
 
-export default function CheckoutForm({ onSubmit, loading }: CheckoutFormProps) {
-  const { items, getTotal, clearCart } = useCart();
-  const router = useRouter();
-  const [formData, setFormData] = useState<FormData>({
-    name: '',
-    phone: '',
-    address: '',
-    notes: '',
-    paymentMethod: 'cod',
-    orderType: 'now',
-    deliveryDate: new Date().toISOString().split('T')[0],
-    deliveryTime: ''
+const itemAnimation = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 }
+};
+
+export default function CheckoutForm({ onSubmit, loading = false }: Props) {
+  const [showPreorderFields, setShowPreorderFields] = useState(false);
+  
+  const { register, handleSubmit, formState: { errors }, watch } = useForm<FormData>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      orderType: 'now',
+      paymentMethod: 'cod',
+    },
   });
-  const [error, setError] = useState<string | null>(null);
 
-  const handleInputChange = <T extends HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(
-    e: React.ChangeEvent<T>
-  ) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
+  const orderType = watch('orderType');
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Validate cart is not empty
-    if (items.length === 0) {
-      setError('Your cart is empty. Please add items before checking out.');
-      return;
-    }
+  // Calculate minimum date (today) and maximum date (7 days from now)
+  const today = new Date();
+  const maxDate = new Date();
+  maxDate.setDate(today.getDate() + 7);
 
-    // Validate delivery fields for pre-orders
-    if (formData.orderType === 'preorder') {
-      if (!formData.deliveryDate) {
-        setError('Please select a delivery date');
-        return;
-      }
-      if (!formData.deliveryTime) {
-        setError('Please select a delivery time');
-        return;
-      }
-    }
-
-    // Validate required fields
-    if (!formData.phone || !formData.address) {
-      setError('Please fill in all required fields');
-      return;
-    }
-
-    setError(null);
-    
-    try {
-      await onSubmit(formData);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred while processing your order.');
-    }
+  const formatDate = (date: Date) => {
+    return date.toISOString().split('T')[0];
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="max-w-2xl mx-auto p-4"
+    <motion.form
+      variants={formAnimation}
+      initial="hidden"
+      animate="show"
+      onSubmit={handleSubmit(onSubmit)}
+      className="space-y-6"
     >
-      <h2 className="text-2xl font-bold mb-6">Checkout</h2>
-      
-      {/* Error Message */}
-      {error && (
-        <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
-          <p className="text-red-400 text-sm">{error}</p>
-        </div>
-      )}
-      
-      {/* Order Type Selection */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold">Order Type</h3>
-        <div className="grid grid-cols-2 gap-4">
-          <button
-            type="button"
-            onClick={() => setFormData(prev => ({ ...prev, orderType: 'now' }))}
-            className={`p-4 rounded-lg border ${
-              formData.orderType === 'now'
-                ? 'bg-yellow-500 text-black border-yellow-500'
-                : 'bg-white/5 border-white/10 hover:bg-white/10'
-            } transition-colors`}
-          >
-            <h4 className="font-semibold">Order Now</h4>
-            <p className="text-sm opacity-75">Get your food delivered ASAP</p>
-          </button>
-          <button
-            type="button"
-            onClick={() => setFormData(prev => ({ ...prev, orderType: 'preorder' }))}
-            className={`p-4 rounded-lg border ${
-              formData.orderType === 'preorder'
-                ? 'bg-yellow-500 text-black border-yellow-500'
-                : 'bg-white/5 border-white/10 hover:bg-white/10'
-            } transition-colors`}
-          >
-            <h4 className="font-semibold">Pre-order</h4>
-            <p className="text-sm opacity-75">Schedule for later delivery</p>
-          </button>
-        </div>
-      </div>
+      {/* Contact Information */}
+      <motion.div
+        variants={itemAnimation}
+        className="bg-theme-navy/50 backdrop-blur-sm rounded-2xl p-6 border border-theme-slate/10 shadow-xl shadow-black/5"
+      >
+        <h2 className="text-xl font-bold mb-6 text-theme-peach flex items-center gap-2">
+          <UserIcon className="w-6 h-6" />
+          Contact Information
+        </h2>
+        <div className="space-y-4">
+          <div>
+            <label htmlFor="name" className="block text-sm font-medium mb-1 text-theme-slate">
+              Full Name
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                id="name"
+                {...register('name')}
+                className="w-full pl-4 pr-10 py-3 rounded-xl bg-theme-dark border border-theme-slate/20 focus:border-theme-peach focus:ring-1 focus:ring-theme-peach transition-colors"
+                placeholder="Juan Dela Cruz"
+              />
+              <UserIcon className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-theme-slate/50" />
+            </div>
+            {errors.name && (
+              <motion.p
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-1 text-sm text-red-500"
+              >
+                {errors.name.message}
+              </motion.p>
+            )}
+          </div>
 
-      {/* Pre-order Details */}
-      {formData.orderType === 'preorder' && (
-        <div className="space-y-4 animate-fadeIn">
-          <h3 className="text-lg font-semibold">Delivery Schedule</h3>
-          <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="phone" className="block text-sm font-medium mb-1 text-theme-slate">
+              Phone Number
+            </label>
+            <div className="relative">
+              <input
+                type="tel"
+                id="phone"
+                {...register('phone')}
+                className="w-full pl-4 pr-10 py-3 rounded-xl bg-theme-dark border border-theme-slate/20 focus:border-theme-peach focus:ring-1 focus:ring-theme-peach transition-colors"
+                placeholder="09123456789"
+              />
+              <PhoneIcon className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-theme-slate/50" />
+            </div>
+            {errors.phone && (
+              <motion.p
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-1 text-sm text-red-500"
+              >
+                {errors.phone.message}
+              </motion.p>
+            )}
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Delivery Information */}
+      <motion.div
+        variants={itemAnimation}
+        className="bg-theme-navy/50 backdrop-blur-sm rounded-2xl p-6 border border-theme-slate/10 shadow-xl shadow-black/5"
+      >
+        <h2 className="text-xl font-bold mb-6 text-theme-peach flex items-center gap-2">
+          <MapPinIcon className="w-6 h-6" />
+          Delivery Information (via Lalamove)
+        </h2>
+        <div className="space-y-4">
+          <div className="bg-theme-peach/10 rounded-xl p-4 mb-4">
+            <p className="text-sm text-theme-slate">
+              We use Lalamove for all our deliveries to ensure fast and reliable service. 
+              Delivery fees will be calculated based on your location through Lalamove's pricing.
+            </p>
+          </div>
+          <div>
+            <label htmlFor="address" className="block text-sm font-medium mb-1 text-theme-slate">
+              Delivery Address
+            </label>
+            <div className="relative">
+              <textarea
+                id="address"
+                {...register('address')}
+                rows={3}
+                className="w-full pl-4 pr-10 py-3 rounded-xl bg-theme-dark border border-theme-slate/20 focus:border-theme-peach focus:ring-1 focus:ring-theme-peach transition-colors resize-none"
+                placeholder="Complete address for Lalamove delivery (House/Unit Number, Street Name, Barangay, Landmarks)"
+              />
+              <MapPinIcon className="absolute right-3 top-3 w-5 h-5 text-theme-slate/50" />
+            </div>
+            {errors.address && (
+              <motion.p
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-1 text-sm text-red-500"
+              >
+                {errors.address.message}
+              </motion.p>
+            )}
+          </div>
+
+          <div>
+            <label htmlFor="notes" className="block text-sm font-medium mb-1 text-theme-slate">
+              Special Instructions for Lalamove Rider (Optional)
+            </label>
+            <div className="relative">
+              <textarea
+                id="notes"
+                {...register('notes')}
+                rows={2}
+                className="w-full pl-4 pr-10 py-3 rounded-xl bg-theme-dark border border-theme-slate/20 focus:border-theme-peach focus:ring-1 focus:ring-theme-peach transition-colors resize-none"
+                placeholder="Additional instructions for the Lalamove rider (e.g., landmarks, gate access, etc.)"
+              />
+              <PencilIcon className="absolute right-3 top-3 w-5 h-5 text-theme-slate/50" />
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Order Type */}
+      <motion.div
+        variants={itemAnimation}
+        className="bg-theme-navy/50 backdrop-blur-sm rounded-2xl p-6 border border-theme-slate/10 shadow-xl shadow-black/5"
+      >
+        <h2 className="text-xl font-bold mb-6 text-theme-peach">When would you like your order?</h2>
+        <div className="grid sm:grid-cols-2 gap-4">
+          <label className="relative">
+            <input
+              type="radio"
+              value="now"
+              {...register('orderType')}
+              className="peer sr-only"
+              onChange={() => setShowPreorderFields(false)}
+            />
+            <div className="p-4 rounded-xl border-2 border-theme-slate/20 cursor-pointer transition-all hover:border-theme-peach peer-checked:border-theme-peach peer-checked:bg-theme-peach/10">
+              <h3 className="font-medium mb-1">Order Now</h3>
+              <p className="text-sm text-theme-slate">Deliver as soon as possible</p>
+            </div>
+          </label>
+
+          <label className="relative">
+            <input
+              type="radio"
+              value="preorder"
+              {...register('orderType')}
+              className="peer sr-only"
+              onChange={() => setShowPreorderFields(true)}
+            />
+            <div className="p-4 rounded-xl border-2 border-theme-slate/20 cursor-pointer transition-all hover:border-theme-peach peer-checked:border-theme-peach peer-checked:bg-theme-peach/10">
+              <h3 className="font-medium mb-1">Pre-order</h3>
+              <p className="text-sm text-theme-slate">Schedule for later delivery</p>
+            </div>
+          </label>
+        </div>
+
+        {orderType === 'preorder' && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="mt-6 space-y-4"
+          >
             <div>
-              <label htmlFor="deliveryDate" className="block text-sm font-medium mb-1">
+              <label htmlFor="deliveryDate" className="block text-sm font-medium mb-1 text-theme-slate">
                 Delivery Date
               </label>
-              <input
-                type="date"
-                id="deliveryDate"
-                name="deliveryDate"
-                value={formData.deliveryDate}
-                onChange={handleInputChange}
-                min={new Date().toISOString().split('T')[0]}
-                required={formData.orderType === 'preorder'}
-                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg
-                  focus:outline-none focus:ring-2 focus:ring-orange-500/50"
-              />
+              <div className="relative">
+                <input
+                  type="date"
+                  id="deliveryDate"
+                  {...register('deliveryDate')}
+                  min={formatDate(today)}
+                  max={formatDate(maxDate)}
+                  className="w-full pl-4 pr-10 py-3 rounded-xl bg-theme-dark border border-theme-slate/20 focus:border-theme-peach focus:ring-1 focus:ring-theme-peach transition-colors"
+                />
+                <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-theme-slate/50" />
+              </div>
+              {errors.deliveryDate && (
+                <motion.p
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-1 text-sm text-red-500"
+                >
+                  {errors.deliveryDate.message}
+                </motion.p>
+              )}
             </div>
+
             <div>
-              <label htmlFor="deliveryTime" className="block text-sm font-medium mb-1">
+              <label htmlFor="deliveryTime" className="block text-sm font-medium mb-1 text-theme-slate">
                 Delivery Time
               </label>
-              <select
-                id="deliveryTime"
-                name="deliveryTime"
-                value={formData.deliveryTime}
-                onChange={handleInputChange}
-                required={formData.orderType === 'preorder'}
-                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg
-                  focus:outline-none focus:ring-2 focus:ring-orange-500/50"
-              >
-                <option value="">Select time</option>
-                <option value="05:00">5:00 AM</option>
-                <option value="06:00">6:00 AM</option>
-                <option value="07:00">7:00 AM</option>
-                <option value="08:00">8:00 AM</option>
-                <option value="09:00">9:00 AM</option>
-                <option value="10:00">10:00 AM</option>
-                <option value="11:00">11:00 AM</option>
-                <option value="12:00">12:00 PM</option>
-                <option value="13:00">1:00 PM</option>
-                <option value="14:00">2:00 PM</option>
-                <option value="15:00">3:00 PM</option>
-                <option value="16:00">4:00 PM</option>
-                <option value="17:00">5:00 PM</option>
-                <option value="18:00">6:00 PM</option>
-                <option value="19:00">7:00 PM</option>
-                <option value="20:00">8:00 PM</option>
-                <option value="21:00">9:00 PM</option>
-                <option value="22:00">10:00 PM</option>
-                <option value="23:00">11:00 PM</option>
-              </select>
+              <div className="relative">
+                <input
+                  type="time"
+                  id="deliveryTime"
+                  {...register('deliveryTime')}
+                  min="09:00"
+                  max="21:00"
+                  className="w-full pl-4 pr-10 py-3 rounded-xl bg-theme-dark border border-theme-slate/20 focus:border-theme-peach focus:ring-1 focus:ring-theme-peach transition-colors"
+                />
+                <ClockIcon className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-theme-slate/50" />
+              </div>
+              {errors.deliveryTime && (
+                <motion.p
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-1 text-sm text-red-500"
+                >
+                  {errors.deliveryTime.message}
+                </motion.p>
+              )}
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Customer Information */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold">Customer Information</h3>
-        
-        <div>
-          <label htmlFor="name" className="block text-sm font-medium mb-1">
-            Full Name
-          </label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            value={formData.name}
-            onChange={handleInputChange}
-            required
-            className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg
-              focus:outline-none focus:ring-2 focus:ring-orange-500/50
-              placeholder:text-gray-500"
-            placeholder="Enter your full name"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="phone" className="block text-sm font-medium mb-1">
-            Contact Number
-          </label>
-          <input
-            type="tel"
-            id="phone"
-            name="phone"
-            value={formData.phone}
-            onChange={handleInputChange}
-            required
-            className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg
-              focus:outline-none focus:ring-2 focus:ring-orange-500/50
-              placeholder:text-gray-500"
-            placeholder="Enter your contact number"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="address" className="block text-sm font-medium mb-1">
-            Delivery Address
-          </label>
-          <textarea
-            id="address"
-            name="address"
-            value={formData.address}
-            onChange={handleInputChange}
-            required
-            rows={3}
-            className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg
-              focus:outline-none focus:ring-2 focus:ring-orange-500/50
-              placeholder:text-gray-500 resize-none"
-            placeholder="Enter your complete delivery address"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="notes" className="block text-sm font-medium mb-1">
-            Order Notes (Optional)
-          </label>
-          <textarea
-            id="notes"
-            name="notes"
-            value={formData.notes}
-            onChange={handleInputChange}
-            rows={2}
-            className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg
-              focus:outline-none focus:ring-2 focus:ring-orange-500/50
-              placeholder:text-gray-500 resize-none"
-            placeholder="Any special instructions for your order?"
-          />
-        </div>
-      </div>
+          </motion.div>
+        )}
+      </motion.div>
 
       {/* Payment Method */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold">Payment Method</h3>
-        <select
-          name="paymentMethod"
-          value={formData.paymentMethod}
-          onChange={handleInputChange}
-          required
-          className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg
-            focus:outline-none focus:ring-2 focus:ring-orange-500/50"
-        >
-          <option value="cod">Cash on Delivery</option>
-          <option value="gcash">GCash (Manual Verification)</option>
-        </select>
-      </div>
+      <motion.div
+        variants={itemAnimation}
+        className="bg-theme-navy/50 backdrop-blur-sm rounded-2xl p-6 border border-theme-slate/10 shadow-xl shadow-black/5"
+      >
+        <h2 className="text-xl font-bold mb-6 text-theme-peach">How would you like to pay?</h2>
+        <div className="grid sm:grid-cols-2 gap-4">
+          <label className="relative">
+            <input
+              type="radio"
+              value="cod"
+              {...register('paymentMethod')}
+              className="peer sr-only"
+            />
+            <div className="p-4 rounded-xl border-2 border-theme-slate/20 cursor-pointer transition-all hover:border-theme-peach peer-checked:border-theme-peach peer-checked:bg-theme-peach/10">
+              <h3 className="font-medium mb-1">Cash on Delivery</h3>
+              <p className="text-sm text-theme-slate">Pay when you receive your order</p>
+            </div>
+          </label>
 
-      {/* Order Summary */}
-      <div className="bg-white/5 rounded-lg p-4 mb-6">
-        <h3 className="text-lg font-semibold mb-3">Order Summary</h3>
-        <div className="space-y-2">
-          {items.map((item) => (
-            <div key={item.id} className="flex justify-between text-sm">
-              <span>{item.name} x{item.quantity}</span>
-              <span>₱{(item.price * item.quantity).toFixed(2)}</span>
+          <label className="relative">
+            <input
+              type="radio"
+              value="gcash"
+              {...register('paymentMethod')}
+              className="peer sr-only"
+            />
+            <div className="p-4 rounded-xl border-2 border-theme-slate/20 cursor-pointer transition-all hover:border-theme-peach peer-checked:border-theme-peach peer-checked:bg-theme-peach/10">
+              <h3 className="font-medium mb-1">GCash</h3>
+              <p className="text-sm text-theme-slate">Pay securely with GCash</p>
             </div>
-          ))}
-          <div className="border-t border-white/10 pt-2 mt-2">
-            <div className="flex justify-between font-bold">
-              <span>Total</span>
-              <span>₱{getTotal().toFixed(2)}</span>
-            </div>
-          </div>
+          </label>
         </div>
-      </div>
+      </motion.div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Submit Button */}
-        <motion.button
-          type="submit"
-          disabled={loading}
-          whileHover={{ scale: 1.01 }}
-          whileTap={{ scale: 0.99 }}
-          className={`w-full py-3 rounded-lg font-semibold
-            ${loading
-              ? 'bg-orange-500/50 cursor-not-allowed'
-              : 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700'
-            } transition-all duration-300`}
-        >
-          {loading ? 'Processing...' : 'Place Order'}
-        </motion.button>
-      </form>
-    </motion.div>
+      {/* Submit Button */}
+      <motion.button
+        variants={itemAnimation}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        disabled={loading}
+        type="submit"
+        className="w-full bg-theme-wine hover:bg-theme-red text-white font-medium py-4 px-8 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-theme-wine/20"
+      >
+        {loading ? (
+          <div className="flex items-center justify-center">
+            <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+            Processing Order...
+          </div>
+        ) : (
+          'Place Order'
+        )}
+      </motion.button>
+    </motion.form>
   );
 }

@@ -1,11 +1,12 @@
-import { Metadata } from 'next';
-import OrdersClient from './OrdersClient';
+'use client';
 
-export const metadata: Metadata = {
-  title: 'Orders Management | Kusina De Amadeo',
-  description: 'Manage orders for Kusina De Amadeo',
-};
+import OrdersClient from './OrdersClient';
+import AdminRoute from '@/components/admin/AdminRoute';
 
 export default function OrdersPage() {
-  return <OrdersClient />;
+  return (
+    <AdminRoute>
+      <OrdersClient />
+    </AdminRoute>
+  );
 }

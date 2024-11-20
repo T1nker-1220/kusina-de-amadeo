@@ -42,3 +42,4 @@ next-env.d.ts
 # Firebase Admin SDK
 kusina-de-amadeo-7cfc1-firebase-adminsdk-gjssy-2597c265eb.json
 *firebase-adminsdk*.json
+src/config/service-account.json

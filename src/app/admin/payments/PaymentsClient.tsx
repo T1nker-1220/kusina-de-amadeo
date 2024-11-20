@@ -2,9 +2,10 @@
 
 import React, { useEffect, useState } from 'react';
 import { collection, query, orderBy, onSnapshot, where, Timestamp } from 'firebase/firestore';
-import { db } from '@/config/firebase';
+import { db } from '@/lib/firebase';
 import { logger } from '@/utils/logger';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAdmin } from '@/hooks/useAdmin';
 
 interface Payment {
   id: string;
@@ -23,8 +24,15 @@ const PaymentsClient = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [dateFilter, setDateFilter] = useState<'all' | 'today' | 'week' | 'month'>('all');
+  const { isAdmin } = useAdmin();
 
   useEffect(() => {
+    if (!isAdmin) {
+      setError('Access denied. Admin privileges required.');
+      setLoading(false);
+      return;
+    }
+
     try {
       let paymentsQuery = query(
         collection(db, 'payments'),
@@ -74,7 +82,7 @@ const PaymentsClient = () => {
       setError('Failed to initialize payments tracking.');
       setLoading(false);
     }
-  }, [dateFilter]);
+  }, [dateFilter, isAdmin]);
 
   const getStatusColor = (status: Payment['status']) => {
     switch (status) {

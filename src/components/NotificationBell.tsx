@@ -79,28 +79,48 @@ export default function NotificationBell() {
   const dropdownVariants = {
     hidden: { 
       opacity: 0,
-      scale: 0.95,
+      scale: 0.8,
       y: -20,
-      x: "25%"
+      transformOrigin: "bottom"
     },
     visible: { 
       opacity: 1,
       scale: 1,
       y: 0,
-      x: "0%",
       transition: {
         type: "spring",
-        stiffness: 300,
-        damping: 30
+        stiffness: 400,
+        damping: 25,
+        mass: 0.5,
+        staggerChildren: 0.1,
+        delayChildren: 0.2
       }
     },
     exit: { 
       opacity: 0,
-      scale: 0.95,
+      scale: 0.8,
       y: -20,
-      x: "25%",
       transition: {
-        duration: 0.2
+        duration: 0.2,
+        ease: "easeInOut"
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { 
+      opacity: 0,
+      y: 20,
+      scale: 0.8
+    },
+    visible: { 
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 20
       }
     }
   };
@@ -147,19 +167,23 @@ export default function NotificationBell() {
         </AnimatePresence>
       </motion.button>
 
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {isOpen && (
           <motion.div
             variants={dropdownVariants}
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="absolute right-0 mt-4 w-96 bg-theme-dark/95 backdrop-blur-xl rounded-2xl
-              shadow-xl overflow-hidden z-50 border border-orange-500/20"
+            className="fixed top-20 left-0 right-0 mx-auto w-[95vw] max-w-md bg-theme-dark/95 backdrop-blur-xl rounded-2xl
+              shadow-2xl overflow-hidden z-[60] border border-orange-500/20
+              transition-all duration-300 ease-in-out"
           >
             {/* Header */}
-            <div className="px-4 py-3 bg-gradient-to-r from-orange-500/10 to-orange-600/10
-              border-b border-orange-500/20 flex justify-between items-center">
+            <motion.div 
+              variants={itemVariants}
+              className="px-4 py-3 bg-gradient-to-r from-orange-500/10 to-orange-600/10
+              border-b border-orange-500/20 flex justify-between items-center"
+            >
               <h3 className="text-lg font-semibold text-orange-400">Notifications</h3>
               {notifications.length > 0 && (
                 <motion.button
@@ -171,14 +195,16 @@ export default function NotificationBell() {
                   Clear All
                 </motion.button>
               )}
-            </div>
+            </motion.div>
 
             {/* Notifications List */}
-            <div className="divide-y divide-orange-500/10 max-h-[70vh] overflow-y-auto">
+            <motion.div 
+              variants={itemVariants}
+              className="divide-y divide-orange-500/10 max-h-[70vh] overflow-y-auto"
+            >
               {notifications.length === 0 ? (
                 <motion.div 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
+                  variants={itemVariants}
                   className="px-4 py-6 text-center text-orange-400/70"
                 >
                   <BellIcon className="mx-auto h-12 w-12 text-orange-400/50" />
@@ -188,11 +214,11 @@ export default function NotificationBell() {
                 notifications.map((notification, index) => (
                   <motion.div
                     key={`${notification.orderId}-${index}`}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
+                    variants={itemVariants}
+                    custom={index}
                     whileHover={{ 
                       backgroundColor: "rgba(251, 146, 60, 0.1)",
+                      scale: 1.02,
                       transition: { duration: 0.2 }
                     }}
                     onClick={() => handleNotificationClick(notification.orderId)}
@@ -225,7 +251,7 @@ export default function NotificationBell() {
                   </motion.div>
                 ))
               )}
-            </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

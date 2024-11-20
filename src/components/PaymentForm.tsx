@@ -3,12 +3,15 @@
 import React, { useState } from 'react';
 import ImageUpload from './ImageUpload';
 import { BiLoaderAlt } from 'react-icons/bi';
-import { FiAlertCircle } from 'react-icons/fi';
+import { FiAlertCircle, FiCheckCircle } from 'react-icons/fi';
 import { logger } from '@/utils/logger';
+import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 
 interface PaymentFormProps {
   orderId: string;
   totalAmount: number;
+  isSubmitting?: boolean;
   onSubmit: (data: {
     paymentProofUrl: string;
     referenceNumber: string;
@@ -18,11 +21,11 @@ interface PaymentFormProps {
 const PaymentForm: React.FC<PaymentFormProps> = ({
   orderId,
   totalAmount,
+  isSubmitting = false,
   onSubmit
 }) => {
   const [paymentProofUrl, setPaymentProofUrl] = useState('');
   const [referenceNumber, setReferenceNumber] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [touched, setTouched] = useState({
     paymentProof: false,
@@ -47,7 +50,6 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
     }
 
     setError(null);
-    setIsSubmitting(true);
     try {
       await onSubmit({
         paymentProofUrl,
@@ -57,129 +59,166 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
       const error = err as Error;
       logger.error('Payment processing error:', error);
       setError(error.message || 'An error occurred during payment processing');
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
   const isFormValid = paymentProofUrl && referenceNumber && referenceNumber.length >= 8;
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-gray-50 py-6 px-4 sm:py-8 sm:px-6 lg:px-8">
-      <form onSubmit={handleSubmit} className="max-w-xl mx-auto">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <motion.div 
+      className="max-w-2xl mx-auto"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
+      <form onSubmit={handleSubmit} className="relative">
+        <div className="bg-theme-navy/50 backdrop-blur-xl rounded-2xl border border-white/10 overflow-hidden
+          shadow-xl shadow-black/10">
           {/* Header */}
-          <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4 sm:px-8 sm:py-6">
-            <h2 className="text-xl sm:text-2xl font-bold text-white mb-1">Payment Confirmation</h2>
-            <p className="text-blue-100 text-sm sm:text-base">Complete your payment details below</p>
+          <div className="bg-gradient-to-br from-orange-500/20 via-orange-600/20 to-orange-700/20 
+            border-b border-white/10 px-6 py-6 sm:px-8">
+            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">Payment Details</h2>
+            <p className="text-white/70">Complete your order by providing payment information</p>
           </div>
 
-          <div className="p-6 sm:p-8 space-y-6">
-            {/* Order Details */}
-            <div className="bg-gray-50 rounded-lg p-4">
+          <div className="p-6 sm:p-8 space-y-8">
+            {/* Order Summary */}
+            <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-white/10">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-gray-500">Order ID</p>
-                  <p className="font-mono text-gray-900">{orderId}</p>
+                  <p className="text-sm text-white/50 mb-1">Order ID</p>
+                  <p className="font-mono text-white/90 text-lg">{orderId}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-gray-500">Amount Due</p>
-                  <p className="text-lg sm:text-xl font-semibold text-gray-900">₱{totalAmount.toFixed(2)}</p>
+                  <p className="text-sm text-white/50 mb-1">Amount Due</p>
+                  <p className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-orange-600 
+                    bg-clip-text text-transparent">
+                    ₱{totalAmount.toFixed(2)}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* GCash Instructions */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-white">Payment Instructions</h3>
+              <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-white/10">
+                <div className="flex items-start gap-4">
+                  <div className="relative w-12 h-12 flex-shrink-0">
+                    <Image
+                      src="/images/gcash-logo.png"
+                      alt="GCash Logo"
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+                  <div className="flex-1 space-y-4">
+                    <div className="space-y-2">
+                      <p className="text-white/90">Send payment to:</p>
+                      <div className="bg-white/10 rounded-lg p-3 flex items-center justify-between">
+                        <span className="font-mono text-white/80">0917 123 4567</span>
+                        <button
+                          type="button"
+                          className="text-sm text-orange-400 hover:text-orange-300 transition-colors"
+                          onClick={() => navigator.clipboard.writeText('09171234567')}
+                        >
+                          Copy
+                        </button>
+                      </div>
+                    </div>
+                    <ol className="space-y-2 text-sm text-white/70">
+                      <li>1. Open your GCash app</li>
+                      <li>2. Send the exact amount to the number above</li>
+                      <li>3. Take a screenshot of the payment confirmation</li>
+                      <li>4. Upload the screenshot below</li>
+                      <li>5. Enter the reference number from GCash</li>
+                    </ol>
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Error Message */}
-            {error && (
-              <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded">
-                <div className="flex items-center">
-                  <FiAlertCircle className="text-red-400 w-5 h-5 mr-2" />
-                  <p className="text-sm text-red-700">{error}</p>
-                </div>
-              </div>
-            )}
+            <AnimatePresence mode="wait">
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="bg-red-500/10 border border-red-500/20 rounded-xl p-4"
+                >
+                  <div className="flex items-center gap-3 text-red-400">
+                    <FiAlertCircle className="w-5 h-5 flex-shrink-0" />
+                    <p className="text-sm">{error}</p>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Payment Proof Upload */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
-                GCash Payment Screenshot
-                <span className="text-red-500">*</span>
+              <label className="block text-sm font-medium text-white/80">
+                Payment Screenshot
+                <span className="text-orange-500 ml-1">*</span>
               </label>
               <ImageUpload
-                value={paymentProofUrl}
-                onChange={(url) => {
-                  setPaymentProofUrl(url);
-                  setTouched(prev => ({ ...prev, paymentProof: true }));
-                  setError(null);
-                }}
+                onImageSelected={setPaymentProofUrl}
+                className="w-full aspect-[3/2] rounded-xl bg-white/5 border border-white/10
+                  hover:bg-white/10 transition-colors"
               />
               {touched.paymentProof && !paymentProofUrl && (
-                <p className="text-red-500 text-sm mt-1">Please upload your payment screenshot</p>
+                <p className="text-sm text-red-400">Please upload your payment screenshot</p>
               )}
             </div>
 
             {/* Reference Number Input */}
             <div className="space-y-2">
-              <label htmlFor="reference" className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-white/80">
                 GCash Reference Number
-                <span className="text-red-500">*</span>
+                <span className="text-orange-500 ml-1">*</span>
               </label>
               <input
                 type="text"
-                id="reference"
                 value={referenceNumber}
-                onChange={(e) => {
-                  setReferenceNumber(e.target.value);
-                  setError(null);
-                }}
-                onBlur={() => setTouched(prev => ({ ...prev, referenceNumber: true }))}
-                className={`
-                  appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 
-                  focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm
-                  ${touched.referenceNumber && !referenceNumber ? 'border-red-300 bg-red-50' : 'border-gray-300'}
-                `}
+                onChange={(e) => setReferenceNumber(e.target.value)}
                 placeholder="Enter your GCash reference number"
-                required
+                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10
+                  text-white placeholder-white/30
+                  focus:outline-none focus:border-orange-500/50 focus:bg-white/10
+                  transition-colors"
               />
-              {touched.referenceNumber && !referenceNumber && (
-                <p className="text-red-500 text-sm mt-1">Please enter the reference number</p>
+              {touched.referenceNumber && (!referenceNumber || referenceNumber.length < 8) && (
+                <p className="text-sm text-red-400">Please enter a valid reference number</p>
               )}
-              {touched.referenceNumber && referenceNumber && referenceNumber.length < 8 && (
-                <p className="text-red-500 text-sm mt-1">Please enter a valid reference number</p>
-              )}
-              <p className="text-sm text-gray-500 mt-1">
-                You can find this in your GCash transaction history
-              </p>
             </div>
 
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={isSubmitting || !isFormValid}
-              className={`
-                w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white
-                transition-all duration-200
+              disabled={!isFormValid || isSubmitting}
+              className={`w-full py-4 px-6 rounded-xl font-semibold
+                transition-all duration-200 flex items-center justify-center gap-2
                 ${isFormValid && !isSubmitting
-                  ? 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
-                  : 'bg-gray-400 cursor-not-allowed'
-                }
-              `}
+                  ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700'
+                  : 'bg-white/10 text-white/50 cursor-not-allowed'
+                }`}
             >
               {isSubmitting ? (
-                <BiLoaderAlt className="h-5 w-5 animate-spin" />
+                <>
+                  <BiLoaderAlt className="w-5 h-5 animate-spin" />
+                  Processing Payment...
+                </>
               ) : (
-                'Submit Payment'
+                <>
+                  <FiCheckCircle className="w-5 h-5" />
+                  Confirm Payment
+                </>
               )}
             </button>
-
-            {/* Help Text */}
-            <p className="text-xs text-center text-gray-500">
-              Need help? Contact our support team
-            </p>
           </div>
         </div>
       </form>
-    </div>
+    </motion.div>
   );
 };
 
