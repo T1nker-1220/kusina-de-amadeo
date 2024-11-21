@@ -1,8 +1,0 @@
-{items.map((item, index) => {
-  console.log('Key value:', item.id)
-  return (
-    <div key={item.id}>
-      {item.content}
-    </div>
-  )
-})}
